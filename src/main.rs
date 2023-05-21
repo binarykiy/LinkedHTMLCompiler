@@ -1,4 +1,4 @@
-use std::fs::OpenOptions;
+use std::fs::{File, OpenOptions};
 use std::io;
 use std::io::{BufRead, Read, Write};
 use std::path::Path;
@@ -10,28 +10,38 @@ fn main() {
         .expect("Failed to read the input");
     input_path_name.retain(|c| c != '\r' && c != '\n' && c != '"');
     let input_path = Path::new(&input_path_name);
-    let mut input_file = OpenOptions::new().read(true).open(input_path)
+    let input_file = OpenOptions::new().read(true).open(input_path)
         .expect("Failed to open the file");
-    let mut input = String::new();
-    input_file.read_to_string(&mut input)
-        .expect("Failed to read the file");
     let output_path = input_path.parent().unwrap().join("out.html");
-    let mut output_file = OpenOptions::new().create(true).truncate(true).write(true).open(output_path)
+    let output_file = OpenOptions::new().create(true).truncate(true).write(true).open(output_path)
         .expect("Failed to create the output file");
-    let mut source = input.as_str();
+    parse_and_write(read_all(input_file), output_file);
+}
+
+fn read_all(mut file: File) -> String {
+    let mut input = String::new();
+    file.read_to_string(&mut input)
+        .expect("Failed to read the file");
+    input
+}
+
+fn write_all<S: AsRef<str>>(content: S, file: &mut File) {
+    file.write_all(content.as_ref().as_bytes())
+        .expect("Failed to write to the output file");
+}
+
+fn parse_and_write(source: String, mut out: File) {
+    let mut source = source.as_str();
     loop {
         if let Some((before_lhc_comment, other)) = source.split_once("<!--?") {
-            output_file.write_all(before_lhc_comment.as_bytes())
-                .expect("Failed to write to the output file");
+            write_all(before_lhc_comment, &mut out);
             let (lhc_comment, after_lhc_comment) = other.split_once("-->")
                 .expect("Syntax Error: expected -->, found eof");
             let processed = lhc_process(lhc_comment);
-            output_file.write_all(processed.as_bytes())
-                .expect("Failed to write to the output file");
+            write_all(&processed, &mut out);
             source = after_lhc_comment;
         } else {
-            output_file.write_all(source.as_bytes())
-                .expect("Failed to write to the output file");
+            write_all(source, &mut out);
             break;
         }
     }
