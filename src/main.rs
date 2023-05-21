@@ -5,11 +5,11 @@ use std::path::Path;
 
 fn main() {
     println!("Enter file path to compile:");
-    let mut input_path = String::new();
-    io::stdin().lock().read_line(&mut input_path)
+    let mut input_path_name = String::new();
+    io::stdin().lock().read_line(&mut input_path_name)
         .expect("Failed to read the input");
-    input_path.retain(|c| c != '\r' && c != '\n');
-    let input_path = Path::new(&input_path);
+    input_path_name.retain(|c| c != '\r' && c != '\n' && c != '"');
+    let input_path = Path::new(&input_path_name);
     let mut input_file = OpenOptions::new().read(true).open(input_path)
         .expect("Failed to open the file");
     let mut input = String::new();
