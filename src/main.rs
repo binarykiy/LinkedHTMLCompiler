@@ -51,26 +51,26 @@ fn lhc_process(content: &str) -> String {
     if content.is_empty() {
         return String::from("<!--?-->");
     }
-    let (key, args) = content.split_once(' ').unwrap_or((content, ""));
-    let mut args_itr = args.split(' ');
+    let (key, args): (& str, & str) = content.split_once(' ').unwrap_or((content, ""));
+    let args_itr = args.split(' ').filter(|arg| {
+        let res = arg.contains('=');
+        if !res && !arg.is_empty() {
+            eprintln!("[ERROR] Illegal property syntax: \"{}\"", arg);
+        }
+        res
+    }).map(|arg| {
+        arg.split_once('=').unwrap()
+    });
     match key {
         "include" => {
-            loop {
-                if let Some(arg) = args_itr.next() {
-                    if let Some((key, value)) = arg.split_once('=') {
-                        match key {
-                            "link" => {
-                                todo!("open {} and read it", value);
-                            }
-                            _ => {
-                                eprintln!("[WARN] Unknown property for \"include\": \"{}\"", key);
-                            }
-                        }
-                    } else {
-                        eprintln!("[ERROR] Illegal syntax for \"include\": \"{}\"", arg);
+            for (key, value) in args_itr {
+                match key {
+                    "link" => {
+                        todo!("open {} and read it", value);
                     }
-                } else {
-                    break;
+                    _ => {
+                        eprintln!("[WARN] Unknown property for \"include\": \"{}={}\"", key, value);
+                    }
                 }
             }
             todo!("feature: include")
