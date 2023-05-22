@@ -55,6 +55,24 @@ fn lhc_process(content: &str) -> String {
     let mut args_itr = args.split(' ');
     match key {
         "include" => {
+            loop {
+                if let Some(arg) = args_itr.next() {
+                    if let Some((key, value)) = arg.split_once('=') {
+                        match key {
+                            "link" => {
+                                todo!("open {} and read it", value);
+                            }
+                            _ => {
+                                eprintln!("[WARN] Unknown property for \"include\": \"{}\"", key);
+                            }
+                        }
+                    } else {
+                        eprintln!("[ERROR] Illegal syntax for \"include\": \"{}\"", arg);
+                    }
+                } else {
+                    break;
+                }
+            }
             todo!("feature: include")
         }
         _ => {
