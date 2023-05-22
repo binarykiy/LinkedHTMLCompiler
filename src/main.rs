@@ -1,3 +1,5 @@
+mod config;
+
 use std::fs::{File, OpenOptions};
 use std::io;
 use std::io::{BufRead, Read, Write};
