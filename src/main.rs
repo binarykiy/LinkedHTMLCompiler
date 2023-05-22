@@ -48,10 +48,18 @@ fn parse_and_write(source: String, mut out: File) {
 }
 
 fn lhc_process(content: &str) -> String {
-    if content.starts_with("include") {
-        todo!("feature: include")
-    } else {
-        eprintln!("Unknown lhc comment: {}", content);
-        String::new()
+    if content.is_empty() {
+        return String::from("<!--?-->");
+    }
+    let (key, args) = content.split_once(' ').unwrap_or((content, ""));
+    let mut args_itr = args.split(' ');
+    match key {
+        "include" => {
+            todo!("feature: include")
+        }
+        _ => {
+            eprintln!("Unknown lhc comment: {}", key);
+            String::from("<!--?-->")
+        }
     }
 }
