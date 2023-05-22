@@ -11,10 +11,10 @@ fn main() {
     file_name.retain(|c| c != '\r' && c != '\n' && c != '"');
     let source = read_all(&file_name)
         .expect("Failed to open the file to compile.");
-    let out = OpenOptions::new().create(true).truncate(true).write(true)
+    let mut out = OpenOptions::new().create(true).truncate(true).write(true)
         .open(Path::new(&file_name).parent().unwrap().join("out.html"))
         .expect("Failed to create the output file");
-    parse_and_write(source, out);
+    parse_and_write(source, &mut out);
 }
 
 fn read_all<S: AsRef<str>>(name: S) -> io::Result<String> {
@@ -30,26 +30,25 @@ fn write_all<S: AsRef<str>>(content: S, file: &mut File) {
         .expect("Failed to write to the output file");
 }
 
-fn parse_and_write(source: String, mut out: File) {
+fn parse_and_write(source: String, out: &mut File) {
     let mut source = source.as_str();
     loop {
         if let Some((before_lhc_comment, other)) = source.split_once("<!--?") {
-            write_all(before_lhc_comment, &mut out);
+            write_all(before_lhc_comment, out);
             let (lhc_comment, after_lhc_comment) = other.split_once("-->")
                 .expect("Syntax Error: expected -->, found eof");
-            let processed = lhc_process(lhc_comment);
-            write_all(&processed, &mut out);
+            lhc_process(lhc_comment, out);
             source = after_lhc_comment;
         } else {
-            write_all(source, &mut out);
+            write_all(source, out);
             break;
         }
     }
 }
 
-fn lhc_process(content: &str) -> String {
+fn lhc_process(content: &str, out: &mut File) {
     if content.is_empty() {
-        return String::from("<!--?-->");
+        write_all("<!--?-->", out);
     }
     let (key, args): (& str, & str) = content.split_once(' ').unwrap_or((content, ""));
     let args_itr = args.split(' ').filter(|arg| {
@@ -73,11 +72,10 @@ fn lhc_process(content: &str) -> String {
                     }
                 }
             }
-            todo!("feature: include")
         }
         _ => {
             eprintln!("Unknown lhc comment: {}", key);
-            String::from("<!--?-->")
+            write_all("<!--?-->", out);
         }
     }
 }
