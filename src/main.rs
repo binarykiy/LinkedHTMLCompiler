@@ -5,24 +5,24 @@ use std::path::Path;
 
 fn main() {
     println!("Enter file path to compile:");
-    let mut input_path_name = String::new();
-    io::stdin().lock().read_line(&mut input_path_name)
+    let mut file_name = String::new();
+    io::stdin().lock().read_line(&mut file_name)
         .expect("Failed to read the input");
-    input_path_name.retain(|c| c != '\r' && c != '\n' && c != '"');
-    let input_path = Path::new(&input_path_name);
-    let input_file = OpenOptions::new().read(true).open(input_path)
-        .expect("Failed to open the file");
-    let output_path = input_path.parent().unwrap().join("out.html");
-    let output_file = OpenOptions::new().create(true).truncate(true).write(true).open(output_path)
+    file_name.retain(|c| c != '\r' && c != '\n' && c != '"');
+    let source = read_all(&file_name)
+        .expect("Failed to open the file to compile.");
+    let out = OpenOptions::new().create(true).truncate(true).write(true)
+        .open(Path::new(&file_name).parent().unwrap().join("out.html"))
         .expect("Failed to create the output file");
-    parse_and_write(read_all(input_file), output_file);
+    parse_and_write(source, out);
 }
 
-fn read_all(mut file: File) -> String {
+fn read_all<S: AsRef<str>>(name: S) -> io::Result<String> {
+    let path = Path::new(name.as_ref());
+    let mut file = OpenOptions::new().read(true).open(path)?;
     let mut input = String::new();
-    file.read_to_string(&mut input)
-        .expect("Failed to read the file");
-    input
+    file.read_to_string(&mut input)?;
+    Ok(input)
 }
 
 fn write_all<S: AsRef<str>>(content: S, file: &mut File) {
