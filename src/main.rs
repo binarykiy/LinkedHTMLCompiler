@@ -18,7 +18,7 @@ fn main() {
     parse_and_write(source, &mut config);
 }
 
-fn read_all<S: AsRef<str>>(name: S) -> io::Result<String> {
+fn read_all<P: AsRef<Path>>(name: P) -> io::Result<String> {
     let path = Path::new(name.as_ref());
     let mut file = OpenOptions::new().read(true).open(path)?;
     let mut input = String::new();
@@ -72,7 +72,7 @@ fn include<'a, F: Iterator<Item=(&'a str, &'a str)>>(iter: F, config: &mut Confi
         match key {
             "link" => {
                 let link = value.trim_matches('"');
-                let mut source = read_all(link)
+                let mut source = read_all(config.relative_path(link))
                     .expect(format!("[ERROR] Failed to read the linked file: {}", value).as_str());
                 if let Some((_, body_from_prefix)) = source.split_once("<body") {
                     let (_, body_after_prefix) = body_from_prefix.split_once('>')
