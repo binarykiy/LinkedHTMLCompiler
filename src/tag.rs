@@ -35,7 +35,7 @@ pub fn extract<'a, 'b>(source: &'a str, tag: &'b str) -> Result<&'a str, SyntaxE
     if let Some((_, from_prefix)) = source.split_once(&opened_begin) {
         if let Some((_, after_prefix)) = from_prefix.split_once('>') {
             let end = format!("</{}>", tag);
-            if let Some((res, _)) = after_prefix.split_once(&end) {
+            if let Some((res, _)) = after_prefix.rsplit_once(&end) {
                 Ok(res)
             } else {
                 Err(SyntaxError::NoTagEnd(end))
