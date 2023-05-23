@@ -14,7 +14,7 @@ impl Config {
             .to_path_buf();
         let out = BufWriter::new(OpenOptions::new()
             .create(true).truncate(true).write(true)
-            .open(workspace.join("input"))
+            .open(workspace.join("out.html"))
             .expect("[FATAL] Failed to open the output file"));
         Self {
             workspace,
