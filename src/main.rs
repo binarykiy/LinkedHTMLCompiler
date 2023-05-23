@@ -77,7 +77,7 @@ fn include<'a, F: Iterator<Item=(&'a str, &'a str)>>(iter: F, config: &mut Confi
                 if let Some((_, body_from_prefix)) = source.split_once("<body") {
                     let (_, body_after_prefix) = body_from_prefix.split_once('>')
                         .expect("[ERROR] Expected '>', not found");
-                    let (_, body) = body_after_prefix.split_once("</body>")
+                    let (body, _) = body_after_prefix.split_once("</body>")
                         .expect("[ERROR] Expected '</body>', not found");
                     source = body.to_string();
                 }

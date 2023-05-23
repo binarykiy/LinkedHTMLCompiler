@@ -1,4 +1,5 @@
 /target
 /.idea
+/debug
 Cargo.lock
 linked_html_compiler.iml
