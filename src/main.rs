@@ -1,5 +1,6 @@
 mod config;
 mod tag;
+mod util;
 
 use std::fs::OpenOptions;
 use std::io;

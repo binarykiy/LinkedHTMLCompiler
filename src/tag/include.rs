@@ -1,6 +1,6 @@
 use crate::config::Config;
 use crate::{parse_and_write, read_all};
-use crate::tag::{extract, SyntaxError};
+use crate::util::{extract, SyntaxError};
 
 pub fn run<'a, F: Iterator<Item=(&'a str, &'a str)>>(iter: F, config: &mut Config) {
     for (key, value) in iter {
