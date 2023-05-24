@@ -3,32 +3,105 @@ use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 
 #[derive(Debug)]
+pub enum ParsedText<'a> {
+    Text(&'a str),
+    Comment(&'a str),
+    Tag(ParsedTag<'a>),
+    CustomTag(ParsedTag<'a>),
+    DocType(&'a str),
+}
+
+impl<'a> ParsedText<'a> {
+    pub fn parse(raw: &'a str) -> Option<Vec<Self>> {
+        let mut res = Vec::new();
+        let mut target = raw;
+        while let Some(next_tag) = Self::next_tag(target, &mut res) {
+            // Custom Tag Prefix (Comment Tag Prefix + '?')
+            if next_tag.starts_with("!--?") {
+                let next_tag = next_tag.split_once("!--?").unwrap().1;
+                if let Some((raw_tag, other)) = next_tag.split_once("-->") {
+                    if let Some(tag) = ParsedTag::new(raw_tag) {
+                        res.push(Self::CustomTag(tag));
+                        target = other;
+                        continue;
+                    } else {
+                        // It is not necessary to throw an error to stop compilation
+                        // because an incorrect custom tag is also a correct comment.
+                        eprintln!("[WARN] The syntax of a custom tag is incorrect:");
+                        eprintln!("\t{}", raw_tag);
+                        // return None;
+                    }
+                } else {
+                    eprintln!("[ERROR] There is no '-->' for a '<!--'.");
+                    return None;
+                }
+            }
+            // Comment Tag Prefix
+            if next_tag.starts_with("!--") {
+                let next_tag = next_tag.split_once("!--").unwrap().1;
+                if let Some((comment, other)) = next_tag.split_once("-->") {
+                    res.push(Self::Comment(comment));
+                    target = other;
+                    continue;
+                } else {
+                    eprintln!("[ERROR] There is no '-->' for a '<!--'.");
+                    return None;
+                }
+            }
+            // DOCTYPE Tag Prefix
+            if next_tag.starts_with('!') {
+                let next_tag = next_tag.split_once("!").unwrap().1;
+                if let Some((doc_type, other)) = next_tag.split_once('>') {
+                    res.push(Self::DocType(doc_type));
+                    target = other;
+                    continue;
+                } else {
+                    eprintln!("[ERROR] There is no '>' for a '<!'.");
+                    return None;
+                }
+            }
+            // Normal Tag
+            if let Some((raw_tag, other)) = next_tag.split_once('>') {
+                if let Some(tag) = ParsedTag::new(raw_tag) {
+                    res.push(Self::Tag(tag));
+                    target = other;
+                    continue;
+                } else {
+                    eprintln!("[WARN] The syntax of a tag is incorrect:");
+                    eprintln!("\t{}", raw_tag);
+                    return None;
+                }
+            } else {
+                eprintln!("[ERROR] There is no '>' for a '<'.");
+                return None;
+            }
+        }
+        Some(res)
+    }
+    fn next_tag(target: &'a str, dest: &mut Vec<Self>) -> Option<&'a str> {
+        if let Some((text, other)) = target.split_once('<') {
+            if !text.is_empty() {
+                dest.push(Self::Text(text));
+            }
+            Some(other)
+        } else {
+            dest.push(Self::Text(target));
+            None
+        }
+    }
+}
+
+#[derive(Debug)]
 pub struct ParsedTag<'a> {
-    is_original: bool,
     tag: &'a str,
     attributes: HashMap<&'a str, &'a str>,
 }
 
 impl<'a> ParsedTag<'a> {
     pub fn new(str_inside: &'a str) -> Option<Self> {
-        let (mut tag, mut raw_attr) = str_inside.split_once(' ')
+        let (tag, raw_attr) = str_inside.split_once(' ')
             .unwrap_or((str_inside, ""));
-        let mut is_original = false;
-        if tag.starts_with("!--?") {
-            is_original = true;
-            tag = tag.split_once("!--?").unwrap().1;
-            if raw_attr.is_empty() {
-                tag = tag.rsplit_once("--")
-                    .expect("Illegal Syntax").0;
-            } else {
-                raw_attr = raw_attr.rsplit_once("--")
-                    .expect("Illegal Syntax").1;
-            }
-        } else if tag.starts_with("!") {
-            return None;
-        }
         let mut res = Self {
-            is_original,
             tag,
             attributes: HashMap::new(),
         };
@@ -45,9 +118,6 @@ impl<'a> ParsedTag<'a> {
                 eprintln!("[WARN] Duplicate attribute key found: {}", key);
             }
         }
-    }
-    pub fn is_original(&self) -> bool {
-        self.is_original
     }
     pub fn tag(&self) -> &str {
         self.tag
