@@ -105,19 +105,26 @@ impl<'a> ParsedTag<'a> {
             tag,
             attributes: HashMap::new(),
         };
-        res.parse_raw_attr(raw_attr);
-        Some(res)
+        if res.parse_raw_attr(raw_attr) {
+            Some(res)
+        } else {
+            None
+        }
     }
-    fn parse_raw_attr(&mut self, raw_attr: &'a str) {
+    fn parse_raw_attr(&mut self, raw_attr: &'a str) -> bool {
         for attribute in raw_attr.split(' ') {
-            let (key, value) = attribute.split_once('=')
-                .expect("Illegal Syntax");
-            if !self.attributes.contains_key(&key) {
-                self.attributes.insert(key, value);
+            if let Some((key, value)) = attribute.split_once('=') {
+                if !self.attributes.contains_key(&key) {
+                    self.attributes.insert(key, value);
+                } else {
+                    eprintln!("[WARN] Duplicate attribute key found: {}", key);
+                }
             } else {
-                eprintln!("[WARN] Duplicate attribute key found: {}", key);
+                eprintln!("[ERROR] There is no separator of a key-value attribute pair");
+                return false;
             }
         }
+        true
     }
     pub fn tag(&self) -> &str {
         self.tag
