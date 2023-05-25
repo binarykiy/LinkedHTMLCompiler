@@ -36,7 +36,7 @@ fn parse(source: String, config: &mut Config) {
     let len = parsed.len();
     for i in 0..len {
         if let ParsedText::CustomTag(_) = &parsed[i] {
-            let mut swap_dest = ParsedText::Text("");
+            let mut swap_dest = ParsedText::Null;
             mem::swap(&mut swap_dest, &mut parsed[i]);
             let ParsedText::CustomTag(tag) = swap_dest else { unreachable!() };
             let ptr = convert_custom(tag, config);
@@ -47,13 +47,13 @@ fn parse(source: String, config: &mut Config) {
 
 fn convert_custom<'a>(source: ParsedTag<'a>, config: &mut Config) -> ParsedText<'a> {
     if let Some(v) = compile_custom(source, config) {
-        ParsedText::Text("") // todo
+        ParsedText::Pointer(v)
     } else {
         ParsedText::Comment("?error")
     }
 }
 
-fn compile_custom<'a>(source: ParsedTag<'a>, config: &mut Config) -> Option<ParsedText<'a>> {
+fn compile_custom<'a>(source: ParsedTag<'a>, config: &mut Config) -> Option<Vec<ParsedText<'a>>> {
     None // todo
 }
 
