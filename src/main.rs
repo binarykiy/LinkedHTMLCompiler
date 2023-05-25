@@ -3,11 +3,11 @@ mod tag;
 mod util;
 
 use std::fs::OpenOptions;
-use std::{io, process};
+use std::{io, mem, process};
 use std::io::{BufRead, Read};
 use std::path::Path;
 use crate::config::Config;
-use crate::util::ParsedText;
+use crate::util::{ParsedTag, ParsedText};
 
 fn main() {
     println!("Enter file path to compile:");
@@ -29,11 +29,32 @@ fn read_all<P: AsRef<Path>>(name: P) -> io::Result<String> {
     Ok(input)
 }
 
-fn parse(source: String, _config: &mut Config) {
-    let parsed = ParsedText::parse(source.as_str()).unwrap_or_else(|| {
+fn parse(source: String, config: &mut Config) {
+    let mut parsed = ParsedText::parse(source.as_str()).unwrap_or_else(|| {
         process::exit(0);
     });
-    // todo
+    let len = parsed.len();
+    for i in 0..len {
+        if let ParsedText::CustomTag(_) = &parsed[i] {
+            let mut swap_dest = ParsedText::Text("");
+            mem::swap(&mut swap_dest, &mut parsed[i]);
+            let ParsedText::CustomTag(tag) = swap_dest else { unreachable!() };
+            let ptr = convert_custom(tag, config);
+            parsed[i] = ptr;
+        }
+    }
+}
+
+fn convert_custom<'a>(source: ParsedTag<'a>, config: &mut Config) -> ParsedText<'a> {
+    if let Some(v) = compile_custom(source, config) {
+        ParsedText::Text("") // todo
+    } else {
+        ParsedText::Comment("?error")
+    }
+}
+
+fn compile_custom<'a>(source: ParsedTag<'a>, config: &mut Config) -> Option<ParsedText<'a>> {
+    None // todo
 }
 
 fn parse_and_write(source: String, config: &mut Config) {
