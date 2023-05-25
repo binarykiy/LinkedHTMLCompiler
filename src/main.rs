@@ -29,7 +29,7 @@ fn read_all<P: AsRef<Path>>(name: P) -> io::Result<String> {
     Ok(input)
 }
 
-fn parse(source: String, config: &mut Config) {
+fn parse(source: String, config: &mut Config) -> Vec<ParsedText> {
     let mut parsed = ParsedText::parse(source.as_str()).unwrap_or_else(|| {
         process::exit(0);
     });
@@ -43,6 +43,7 @@ fn parse(source: String, config: &mut Config) {
             parsed[i] = ptr;
         }
     }
+    parsed
 }
 
 fn convert_custom<'a>(source: ParsedTag<'a>, config: &mut Config) -> ParsedText<'a> {
