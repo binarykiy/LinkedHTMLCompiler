@@ -91,6 +91,28 @@ impl<'a> ParsedText<'a> {
     }
 }
 
+impl<'a> Display for ParsedText<'a> {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Text(v) => {
+                write!(fmt, "{}", v)
+            }
+            Self::Comment(v) => {
+                write!(fmt, "<!--{}-->", v)
+            }
+            Self::Tag(v) => {
+                write!(fmt, "<{}>", v)
+            }
+            Self::CustomTag(v) => {
+                write!(fmt, "<!--?{}-->", v)
+            }
+            Self::DocType(v) => {
+                write!(fmt, "<!{}>", v)
+            }
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct ParsedTag<'a> {
     tag: &'a str,
@@ -142,6 +164,19 @@ impl<'a> ParsedTag<'a> {
         for attr in self.attributes {
             eprintln!("[WARN] Attribute '{}' does not work in Tag '{}'", attr.0, self.tag);
         }
+    }
+}
+
+impl<'a> Display for ParsedTag<'a> {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut buf = self.tag.to_string();
+        for (key, value) in &self.attributes {
+            buf += " ";
+            buf += key;
+            buf += "=";
+            buf += value;
+        }
+        write!(fmt, "{}", buf)
     }
 }
 
