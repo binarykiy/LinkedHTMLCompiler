@@ -18,7 +18,7 @@ fn main() {
     let source = read_all(&file_name)
         .expect("Failed to open the file to compile.");
     let mut config = Config::init(file_name);
-    let parsed = parse(source, &mut config);
+    let parsed = parse(source.as_str(), &mut config);
     for text in parsed {
         config.write_all(format!("{}", text));
     }
@@ -32,8 +32,8 @@ fn read_all<P: AsRef<Path>>(name: P) -> io::Result<String> {
     Ok(input)
 }
 
-fn parse(source: String, config: &mut Config) -> Vec<ParsedText> {
-    let mut parsed = ParsedText::parse(source.as_str()).unwrap_or_else(|| {
+fn parse<'a, 'b>(source: &'a str, config: &'b mut Config) -> Vec<ParsedText<'a>> {
+    let mut parsed = ParsedText::parse(source).unwrap_or_else(|| {
         process::exit(0);
     });
     let len = parsed.len();

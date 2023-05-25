@@ -9,7 +9,7 @@ pub fn run<'a>(mut source: ParsedTag<'a>, config: &mut Config) -> Option<Vec<Par
         let link = value.trim_matches('"');
         let source = read_all(config.relative_path(link))
             .expect(format!("[ERROR] Failed to read the linked file: {}", value).as_str());
-        let parsed = parse(source, config);
+        let parsed = parse(source.as_str(), config);
         let len = parsed.len();
         let mut begin = len;
         let mut end = len;
