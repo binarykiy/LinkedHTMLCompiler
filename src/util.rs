@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::error::Error;
+use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 
 #[derive(Debug)]
@@ -9,7 +10,8 @@ pub enum ParsedText<'a> {
     Tag(ParsedTag<'a>),
     CustomTag(ParsedTag<'a>),
     DocType(&'a str),
-    Pointer(Box<ParsedText<'a>>),
+    Pointer(Vec<ParsedText<'a>>),
+    Null,
 }
 
 impl<'a> ParsedText<'a> {
@@ -93,7 +95,7 @@ impl<'a> ParsedText<'a> {
 }
 
 impl<'a> Display for ParsedText<'a> {
-    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
         match self {
             Self::Text(v) => {
                 write!(fmt, "{}", v)
@@ -111,7 +113,14 @@ impl<'a> Display for ParsedText<'a> {
                 write!(fmt, "<!{}>", v)
             }
             Self::Pointer(v) => {
-                write!(fmt, "{}", v)
+                for text in v {
+                    write!(fmt, "{}", text)?;
+                }
+                Ok(())
+            }
+            Self::Null => {
+                // null cannot format
+                Err(fmt::Error)
             }
         }
     }
@@ -172,7 +181,7 @@ impl<'a> ParsedTag<'a> {
 }
 
 impl<'a> Display for ParsedTag<'a> {
-    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
         let mut buf = self.tag.to_string();
         for (key, value) in &self.attributes {
             buf += " ";
