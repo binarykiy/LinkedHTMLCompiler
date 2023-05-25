@@ -18,7 +18,10 @@ fn main() {
     let source = read_all(&file_name)
         .expect("Failed to open the file to compile.");
     let mut config = Config::init(file_name);
-    parse_and_write(source, &mut config);
+    let parsed = parse(source, &mut config);
+    for text in parsed {
+        config.write_all(format!("{}", text));
+    }
 }
 
 fn read_all<P: AsRef<Path>>(name: P) -> io::Result<String> {
@@ -61,49 +64,6 @@ fn compile_custom<'a>(source: ParsedTag<'a>, config: &mut Config) -> Option<Vec<
         }
         _ => {
             None
-        }
-    }
-}
-
-#[deprecated]
-fn parse_and_write(source: String, config: &mut Config) {
-    let mut source = source.as_str();
-    loop {
-        if let Some((before_lhc_comment, other)) = source.split_once("<!--?") {
-            config.write_all(before_lhc_comment);
-            let (lhc_comment, after_lhc_comment) = other.split_once("-->")
-                .expect("Syntax Error: expected -->, found eof");
-            lhc_process(lhc_comment, config);
-            source = after_lhc_comment;
-        } else {
-            config.write_all(source);
-            break;
-        }
-    }
-}
-
-#[deprecated]
-fn lhc_process(content: &str, config: &mut Config) {
-    if content.is_empty() {
-        config.write_all("<!--?-->");
-    }
-    let (key, args): (& str, & str) = content.split_once(' ').unwrap_or((content, ""));
-    let args_itr = args.split(' ').filter(|arg| {
-        let res = arg.contains('=');
-        if !res && !arg.is_empty() {
-            eprintln!("[ERROR] Illegal property syntax: \"{}\"", arg);
-        }
-        res
-    }).map(|arg| {
-        arg.split_once('=').unwrap()
-    });
-    match key {
-        "include" => {
-            tag::include(args_itr, config);
-        }
-        _ => {
-            eprintln!("Unknown lhc comment: {}", key);
-            config.write_all("<!--?-->");
         }
     }
 }
