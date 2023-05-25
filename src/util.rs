@@ -9,6 +9,7 @@ pub enum ParsedText<'a> {
     Tag(ParsedTag<'a>),
     CustomTag(ParsedTag<'a>),
     DocType(&'a str),
+    Pointer(Box<ParsedText<'a>>),
 }
 
 impl<'a> ParsedText<'a> {
@@ -108,6 +109,9 @@ impl<'a> Display for ParsedText<'a> {
             }
             Self::DocType(v) => {
                 write!(fmt, "<!{}>", v)
+            }
+            Self::Pointer(v) => {
+                write!(fmt, "{}", v)
             }
         }
     }
