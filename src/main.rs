@@ -54,9 +54,17 @@ fn convert_custom<'a>(source: ParsedTag<'a>, config: &mut Config) -> ParsedText<
 }
 
 fn compile_custom<'a>(source: ParsedTag<'a>, config: &mut Config) -> Option<Vec<ParsedText<'a>>> {
-    None // todo
+    match source.tag() {
+        "include" => {
+            tag::include(source, config)
+        }
+        _ => {
+            None
+        }
+    }
 }
 
+#[deprecated]
 fn parse_and_write(source: String, config: &mut Config) {
     let mut source = source.as_str();
     loop {
@@ -73,6 +81,7 @@ fn parse_and_write(source: String, config: &mut Config) {
     }
 }
 
+#[deprecated]
 fn lhc_process(content: &str, config: &mut Config) {
     if content.is_empty() {
         config.write_all("<!--?-->");
