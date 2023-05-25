@@ -3,10 +3,11 @@ mod tag;
 mod util;
 
 use std::fs::OpenOptions;
-use std::io;
+use std::{io, process};
 use std::io::{BufRead, Read};
 use std::path::Path;
 use crate::config::Config;
+use crate::util::ParsedText;
 
 fn main() {
     println!("Enter file path to compile:");
@@ -26,6 +27,13 @@ fn read_all<P: AsRef<Path>>(name: P) -> io::Result<String> {
     let mut input = String::new();
     file.read_to_string(&mut input)?;
     Ok(input)
+}
+
+fn parse(source: String, _config: &mut Config) {
+    let parsed = ParsedText::parse(source.as_str()).unwrap_or_else(|| {
+        process::exit(0);
+    });
+    // todo
 }
 
 fn parse_and_write(source: String, config: &mut Config) {
