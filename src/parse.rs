@@ -1,3 +1,7 @@
+pub mod tag;
+pub mod token;
+pub mod doc;
+
 use std::collections::HashMap;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};

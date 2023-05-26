@@ -1,13 +1,13 @@
 mod config;
-mod tag;
-mod util;
+mod custom;
+mod parse;
 
 use std::fs::OpenOptions;
 use std::{io, mem, process};
 use std::io::{BufRead, Read};
 use std::path::Path;
 use crate::config::Config;
-use crate::util::{ParsedTag, ParsedText};
+use crate::parse::{ParsedTag, ParsedText};
 
 fn main() {
     println!("Enter file path to compile:");
@@ -60,7 +60,7 @@ fn convert_custom(source: ParsedTag, config: &mut Config) -> ParsedText {
 fn compile_custom(source: ParsedTag, config: &mut Config) -> Option<Vec<ParsedText>> {
     match source.tag() {
         "include" => {
-            tag::include(source, config)
+            custom::include(source, config)
         }
         _ => {
             None

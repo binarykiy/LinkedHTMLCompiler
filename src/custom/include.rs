@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 use crate::config::Config;
 use crate::{parse, read_all};
-use crate::util::{ParsedTag, ParsedText};
+use crate::parse::{ParsedTag, ParsedText};
 
 pub fn run(mut source: ParsedTag, config: &mut Config) -> Option<Vec<ParsedText>> {
     let mut res = None;
