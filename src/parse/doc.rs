@@ -1,3 +1,4 @@
+use std::ops::Index;
 use crate::parse::tag::Tag;
 use crate::parse::token::Token;
 
@@ -85,5 +86,16 @@ impl Doc {
             dest.push(Token::Text(String::from(target)));
             None
         }
+    }
+    pub fn len(&self) -> usize {
+        self.doc.len()
+    }
+}
+
+impl Index<usize> for Doc {
+    type Output = Token;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        self.doc.index(index)
     }
 }
