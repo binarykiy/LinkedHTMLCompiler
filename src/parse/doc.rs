@@ -10,9 +10,9 @@ pub struct Doc {
 }
 
 impl Doc {
-    pub fn parse(doc: &str) -> Option<Self> {
+    pub fn parse(doc: String) -> Option<Self> {
         let mut res = Vec::new();
-        let mut target = doc;
+        let mut target = doc.as_str();
         while let Some(next_tag) = Self::next_tag(target, &mut res) {
             // Custom Tag Prefix (Comment Tag Prefix + '?')
             if next_tag.starts_with("!--?") {
