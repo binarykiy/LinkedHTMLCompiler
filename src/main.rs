@@ -39,17 +39,13 @@ fn parse(source: &str, config: &mut Config) -> Doc {
         process::exit(0);
     });
     parsed.reassign_custom(|tag| {
-        convert_custom(tag, config)
+        if let Some(v) = compile_custom(tag, config) {
+            Token::Pointer(v)
+        } else {
+            Token::Comment(String::from("?error"))
+        }
     });
     parsed
-}
-
-fn convert_custom(source: Tag, config: &mut Config) -> Token {
-    if let Some(v) = compile_custom(source, config) {
-        Token::Pointer(v)
-    } else {
-        Token::Comment(String::from("?error"))
-    }
 }
 
 fn compile_custom(source: Tag, config: &mut Config) -> Option<Doc> {
