@@ -1,4 +1,5 @@
 use std::collections::VecDeque;
+use std::fmt::{Display, Formatter};
 use std::ops::{Index, IndexMut, RangeBounds};
 use crate::parse::tag::Tag;
 use crate::parse::token::Token;
@@ -136,5 +137,14 @@ impl Index<usize> for Doc {
 impl IndexMut<usize> for Doc {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         self.doc.index_mut(index)
+    }
+}
+
+impl Display for Doc {
+    fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
+        for token in &self.doc {
+            write!(fmt, "{}", token)?;
+        }
+        Ok(())
     }
 }
