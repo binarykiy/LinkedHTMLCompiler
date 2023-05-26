@@ -17,7 +17,7 @@ fn main() {
     let source = read_all(&name)
         .expect("Failed to open the file to compile.");
     let mut cfg = Config::init(name);
-    let doc = parse::parse(source.as_str(), &mut cfg);
+    let doc = parse::parse(source, &mut cfg);
     cfg.write_all(format!("{}", doc))
 }
 
