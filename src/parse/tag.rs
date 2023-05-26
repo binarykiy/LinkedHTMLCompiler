@@ -30,12 +30,7 @@ impl Tag {
                 continue
             }
             if let Some((key, value)) = Self::parse_single_attr(attribute) {
-                if !self.attr_key.contains(&key) {
-                    self.attr_key.push(key);
-                    self.attr_value.push(String::from(value));
-                } else {
-                    eprintln!("[WARN] Duplicate attribute key found: {}", key);
-                }
+                self.push_attribute(key, value);
             } else {
                 eprintln!("[ERROR] There is no separator of a key-value attribute pair");
                 return false;
@@ -52,6 +47,14 @@ impl Tag {
             }
         } else {
             None
+        }
+    }
+    fn push_attribute(&mut self, key: String, value: String) {
+        if !self.attr_key.contains(&key) {
+            self.attr_key.push(key);
+            self.attr_value.push(String::from(value));
+        } else {
+            eprintln!("[WARN] Duplicate attribute key found: {}", key);
         }
     }
     pub fn tag(&self) -> &str {
