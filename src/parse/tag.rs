@@ -37,23 +37,26 @@ impl Tag {
             eprintln!("[ERROR] There is no value of an attribute for key: {}", key);
             return None
         }
-        let to;
-        if slice[eq + 1] == b'"' {
-            let dq = find_first_of(slice, b'"', eq + 2);
+        let to = self.end_of_value(slice, eq + 1, key)?;
+        let value = str::from_utf8(&slice[eq + 1..to]).unwrap();
+        self.push_attribute(String::from(key), String::from(value));
+        Some(find_first_not_of(slice, b' ', to))
+    }
+    fn end_of_value(&mut self, slice: &[u8], from: usize, key: &str) -> Option<usize> {
+        let len = slice.len();
+        if slice[from] == b'"' {
+            let dq = find_first_of(slice, b'"', from + 1);
             if dq == len {
                 eprintln!("[ERROR] There is no value of an attribute for key: {}", key);
                 return None
             }
-            to = dq + 1;
-        } else if slice[eq + 1] == b' ' {
+            Some(dq + 1)
+        } else if slice[from] == b' ' {
             eprintln!("[ERROR] There is no value of an attribute for key: {}", key);
-            return None
+            None
         } else {
-            to = find_first_of(slice, b' ', eq);
+            Some(find_first_of(slice, b' ', from))
         }
-        let value = str::from_utf8(&slice[eq + 1..to]).unwrap();
-        self.push_attribute(String::from(key), String::from(value));
-        Some(find_first_not_of(slice, b' ', to))
     }
     fn push_attribute(&mut self, key: String, value: String) {
         if !self.attr_key.contains(&key) {
