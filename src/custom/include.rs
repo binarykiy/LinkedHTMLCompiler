@@ -11,7 +11,7 @@ pub fn run(mut source: Tag, config: &mut Config) -> Option<Doc> {
         let link = value.trim_matches('"');
         let source = read_all(config.relative_path(link))
             .expect(format!("[ERROR] Failed to read the linked file: {}", value).as_str());
-        let parsed = parse(source.as_str(), config);
+        let mut parsed = parse(source.as_str(), config);
         let len = parsed.len();
         let mut begin = len;
         let mut end = len;
@@ -39,15 +39,9 @@ pub fn run(mut source: Tag, config: &mut Config) -> Option<Doc> {
             res = Some(parsed);
             return;
         }
-        if begin != len && end != len && begin < end {
-            let mut tmp = VecDeque::from(Doc::to_vec(parsed));
-            for _ in 0..=begin {
-                tmp.pop_front();
-            }
-            for _ in end..len {
-                tmp.pop_back();
-            }
-            res = Some(Doc::from_vec(Vec::from(tmp)));
+        if begin != len && end != len {
+            parsed.extract(begin+1..end);
+            res = Some(parsed);
             return;
         }
     });

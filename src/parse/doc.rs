@@ -1,22 +1,23 @@
-use std::ops::{Index, IndexMut};
+use std::collections::VecDeque;
+use std::ops::{Index, IndexMut, RangeBounds};
 use crate::parse::tag::Tag;
 use crate::parse::token::Token;
 
 #[derive(Debug)]
 pub struct Doc {
-    doc: Vec<Token>,
+    doc: VecDeque<Token>,
 }
 
 impl Doc {
     #[deprecated]
     pub fn from_vec(vec: Vec<Token>) -> Self {
         Self {
-            doc: vec,
+            doc: vec.into(),
         }
     }
     #[deprecated]
     pub fn to_vec(self) -> Vec<Token> {
-        self.doc
+        self.doc.into()
     }
     pub fn parse(doc: &str) -> Option<Self> {
         let mut res = Vec::new();
@@ -83,7 +84,7 @@ impl Doc {
             }
         }
         Some(Self {
-            doc: res,
+            doc: res.into(),
         })
     }
     fn next_tag<'a, 'b>(target: &'a str, dest: &'b mut Vec<Token>) -> Option<&'a str> {
@@ -95,6 +96,19 @@ impl Doc {
         } else {
             dest.push(Token::Text(String::from(target)));
             None
+        }
+    }
+    pub fn extract<R: RangeBounds<usize>>(&mut self, range: R) {
+        let triggered = false;
+        let len = self.doc.len();
+        for i in 0..len {
+            if !range.contains(&i) {
+                if triggered {
+                    self.doc.pop_back();
+                } else {
+                    self.doc.pop_front();
+                }
+            }
         }
     }
     pub fn len(&self) -> usize {
