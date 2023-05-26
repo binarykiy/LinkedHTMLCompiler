@@ -104,7 +104,7 @@ impl Doc {
             }
         }
     }
-    pub fn find(&self, tag_name: &str) -> Vec<usize> {
+    pub fn find_tags(&self, tag_name: &str) -> Vec<usize> {
         let mut vec = Vec::new();
         let len = self.doc.len();
         for i in 0..len {

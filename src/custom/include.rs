@@ -10,8 +10,8 @@ pub fn run(mut source: Tag, config: &mut Config) -> Option<Doc> {
         let source = read_all(config.relative_path(link))
             .expect(format!("[ERROR] Failed to read the linked file: {}", value).as_str());
         let mut parsed = parse::parse(source.as_str(), config);
-        let begin = parsed.find("body");
-        let end = parsed.find("/body");
+        let begin = parsed.find_tags("body");
+        let end = parsed.find_tags("/body");
         validate_body_tag(&begin, &end);
         if begin.len() == 1 && begin.len() == 1 {
             parsed.extract(begin[0]+1..end[0]);
