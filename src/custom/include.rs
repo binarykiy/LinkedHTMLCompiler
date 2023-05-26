@@ -3,22 +3,22 @@ use crate::{parse, read_all};
 use crate::parse::doc::Doc;
 use crate::parse::tag::Tag;
 
-pub fn run(mut source: Tag, config: &mut Config) -> Option<Doc> {
-    let mut res = None;
-    source.consume("link", |value| {
+pub fn run(mut tag: Tag, cfg: &mut Config) -> Option<Doc> {
+    let mut doc = None;
+    tag.consume("link", |value| {
         let link = value.trim_matches('"');
-        let source = read_all(config.relative_path(link))
+        let source = read_all(cfg.relative_path(link))
             .expect(format!("[ERROR] Failed to read the linked file: {}", value).as_str());
-        let mut parsed = parse::parse(source.as_str(), config);
-        let begin = parsed.find_tags("body");
-        let end = parsed.find_tags("/body");
+        let mut linked_doc = parse::parse(source.as_str(), cfg);
+        let begin = linked_doc.find_tags("body");
+        let end = linked_doc.find_tags("/body");
         validate_body_tag(&begin, &end);
         if begin.len() == 1 && begin.len() == 1 {
-            parsed.extract(begin[0]+1..end[0]);
+            linked_doc.extract(begin[0]+1..end[0]);
         }
-        res = Some(parsed);
+        doc = Some(linked_doc);
     });
-    res
+    doc
 }
 
 fn validate_body_tag(begin: &Vec<usize>, end: &Vec<usize>) -> bool {
