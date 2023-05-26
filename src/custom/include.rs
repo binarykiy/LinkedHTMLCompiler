@@ -9,7 +9,7 @@ pub fn run(mut source: Tag, config: &mut Config) -> Option<Doc> {
         let link = value.trim_matches('"');
         let source = read_all(config.relative_path(link))
             .expect(format!("[ERROR] Failed to read the linked file: {}", value).as_str());
-        let mut parsed = parse(source.as_str(), config);
+        let mut parsed = parse::parse(source.as_str(), config);
         let len = parsed.len();
         let mut begin = len;
         let mut end = len;
