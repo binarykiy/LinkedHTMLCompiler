@@ -9,6 +9,7 @@ use std::path::Path;
 use parse::tag::Tag;
 use crate::config::Config;
 use parse::token::Token;
+use crate::parse::doc::Doc;
 
 fn main() {
     println!("Enter file path to compile:");
@@ -20,8 +21,8 @@ fn main() {
         .expect("Failed to open the file to compile.");
     let mut config = Config::init(file_name);
     let parsed = parse(source.as_str(), &mut config);
-    for text in parsed {
-        config.write_all(format!("{}", text));
+    for i in 0..parsed.len() {
+        config.write_all(format!("{}", parsed[i]));
     }
 }
 
@@ -33,7 +34,7 @@ fn read_all<P: AsRef<Path>>(name: P) -> io::Result<String> {
     Ok(input)
 }
 
-fn parse(source: &str, config: &mut Config) -> Vec<Token> {
+fn parse(source: &str, config: &mut Config) -> Doc {
     let mut parsed = Token::parse(source).unwrap_or_else(|| {
         process::exit(0);
     });
@@ -47,7 +48,7 @@ fn parse(source: &str, config: &mut Config) -> Vec<Token> {
             parsed[i] = ptr;
         }
     }
-    parsed
+    Doc::from_vec(parsed)
 }
 
 fn convert_custom(source: Tag, config: &mut Config) -> Token {
@@ -58,7 +59,7 @@ fn convert_custom(source: Tag, config: &mut Config) -> Token {
     }
 }
 
-fn compile_custom(source: Tag, config: &mut Config) -> Option<Vec<Token>> {
+fn compile_custom(source: Tag, config: &mut Config) -> Option<Doc> {
     match source.tag() {
         "include" => {
             custom::include(source, config)

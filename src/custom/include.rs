@@ -1,10 +1,11 @@
 use std::collections::VecDeque;
 use crate::config::Config;
 use crate::{parse, read_all};
+use crate::parse::doc::Doc;
 use crate::parse::token::Token;
 use crate::parse::tag::Tag;
 
-pub fn run(mut source: Tag, config: &mut Config) -> Option<Vec<Token>> {
+pub fn run(mut source: Tag, config: &mut Config) -> Option<Doc> {
     let mut res = None;
     source.consume("link", |value| {
         let link = value.trim_matches('"');
@@ -39,14 +40,14 @@ pub fn run(mut source: Tag, config: &mut Config) -> Option<Vec<Token>> {
             return;
         }
         if begin != len && end != len && begin < end {
-            let mut tmp = VecDeque::from(parsed);
+            let mut tmp = VecDeque::from(Doc::to_vec(parsed));
             for _ in 0..=begin {
                 tmp.pop_front();
             }
             for _ in end..len {
                 tmp.pop_back();
             }
-            res = Some(Vec::from(tmp));
+            res = Some(Doc::from_vec(Vec::from(tmp)));
             return;
         }
     });

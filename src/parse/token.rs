@@ -1,5 +1,6 @@
 use std::fmt::{Display, Formatter};
 use std::fmt;
+use crate::parse::doc::Doc;
 use crate::parse::tag::Tag;
 
 #[derive(Debug)]
@@ -9,7 +10,7 @@ pub enum Token {
     Tag(Tag),
     CustomTag(Tag),
     DocType(String),
-    Pointer(Vec<Token>),
+    Pointer(Doc),
     Null,
 }
 
@@ -112,8 +113,8 @@ impl Display for Token {
                 write!(fmt, "<!{}>", v)
             }
             Self::Pointer(v) => {
-                for text in v {
-                    write!(fmt, "{}", text)?;
+                for i in 0..v.len() {
+                    write!(fmt, "{}", v[i])?;
                 }
                 Ok(())
             }
