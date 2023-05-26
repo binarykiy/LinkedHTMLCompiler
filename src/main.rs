@@ -3,7 +3,7 @@ mod custom;
 mod parse;
 
 use std::fs::OpenOptions;
-use std::{io, mem, process};
+use std::{io, process};
 use std::io::{BufRead, Read};
 use std::path::Path;
 use parse::tag::Tag;
@@ -13,45 +13,46 @@ use crate::parse::doc::Doc;
 
 fn main() {
     println!("Enter file path to compile:");
-    let mut file_name = String::new();
-    io::stdin().lock().read_line(&mut file_name)
+    let mut name = String::new();
+    io::stdin().lock().read_line(&mut name)
         .expect("Failed to read the input");
-    file_name.retain(|c| c != '\r' && c != '\n' && c != '"');
-    let source = read_all(&file_name)
+    name.retain(|c| c != '\r' && c != '\n' && c != '"');
+    let source = read_all(&name)
         .expect("Failed to open the file to compile.");
-    let mut config = Config::init(file_name);
-    let parsed = parse(source.as_str(), &mut config);
-    for i in 0..parsed.len() {
-        config.write_all(format!("{}", parsed[i]));
+    let mut cfg = Config::init(name);
+    let doc = parse(source.as_str(), &mut cfg);
+    let len = doc.len();
+    for i in 0..len {
+        cfg.write_all(format!("{}", doc[i]));
     }
 }
 
 fn read_all<P: AsRef<Path>>(name: P) -> io::Result<String> {
     let path = Path::new(name.as_ref());
     let mut file = OpenOptions::new().read(true).open(path)?;
-    let mut input = String::new();
-    file.read_to_string(&mut input)?;
-    Ok(input)
+    let mut buf = String::new();
+    file.read_to_string(&mut buf)?;
+    Ok(buf)
 }
 
-fn parse(source: &str, config: &mut Config) -> Doc {
-    let mut parsed = Doc::parse(source).unwrap_or_else(|| {
+fn parse(source: &str, cfg: &mut Config) -> Doc {
+    let mut doc = Doc::parse(source).unwrap_or_else(|| {
         process::exit(0);
     });
-    parsed.reassign_custom(|tag| {
-        if let Some(v) = compile_custom(tag, config) {
+    doc.reassign_custom(|tag| {
+        if let Some(v) = compile_custom(tag, cfg) {
             Token::Pointer(v)
         } else {
             Token::Comment(String::from("?error"))
         }
     });
-    parsed
+    doc
 }
 
-fn compile_custom(source: Tag, config: &mut Config) -> Option<Doc> {
-    match source.tag() {
+fn compile_custom(tag: Tag, cfg: &mut Config) -> Option<Doc> {
+    match tag.tag() {
         "include" => {
-            custom::include(source, config)
+            custom::include(tag, cfg)
         }
         _ => {
             None
