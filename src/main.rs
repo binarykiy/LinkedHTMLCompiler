@@ -32,7 +32,7 @@ fn read_all<P: AsRef<Path>>(name: P) -> io::Result<String> {
     Ok(input)
 }
 
-fn parse<'a, 'b>(source: &'a str, config: &'b mut Config) -> Vec<ParsedText<'a>> {
+fn parse(source: &str, config: &mut Config) -> Vec<ParsedText> {
     let mut parsed = ParsedText::parse(source).unwrap_or_else(|| {
         process::exit(0);
     });
@@ -49,15 +49,15 @@ fn parse<'a, 'b>(source: &'a str, config: &'b mut Config) -> Vec<ParsedText<'a>>
     parsed
 }
 
-fn convert_custom<'a>(source: ParsedTag, config: &mut Config) -> ParsedText<'a> {
+fn convert_custom(source: ParsedTag, config: &mut Config) -> ParsedText {
     if let Some(v) = compile_custom(source, config) {
         ParsedText::Pointer(v)
     } else {
-        ParsedText::Comment("?error")
+        ParsedText::Comment(String::from("?error"))
     }
 }
 
-fn compile_custom<'a>(source: ParsedTag, config: &mut Config) -> Option<Vec<ParsedText<'a>>> {
+fn compile_custom(source: ParsedTag, config: &mut Config) -> Option<Vec<ParsedText>> {
     match source.tag() {
         "include" => {
             tag::include(source, config)

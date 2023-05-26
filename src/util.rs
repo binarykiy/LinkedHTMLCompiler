@@ -3,18 +3,18 @@ use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 
 #[derive(Debug)]
-pub enum ParsedText<'a> {
-    Text(&'a str),
-    Comment(&'a str),
+pub enum ParsedText {
+    Text(String),
+    Comment(String),
     Tag(ParsedTag),
     CustomTag(ParsedTag),
-    DocType(&'a str),
-    Pointer(Vec<ParsedText<'a>>),
+    DocType(String),
+    Pointer(Vec<ParsedText>),
     Null,
 }
 
-impl<'a> ParsedText<'a> {
-    pub fn parse(raw: &'a str) -> Option<Vec<Self>> {
+impl ParsedText {
+    pub fn parse(raw: &str) -> Option<Vec<Self>> {
         let mut res = Vec::new();
         let mut target = raw;
         while let Some(next_tag) = Self::next_tag(target, &mut res) {
@@ -42,7 +42,7 @@ impl<'a> ParsedText<'a> {
             if next_tag.starts_with("!--") {
                 let next_tag = next_tag.split_once("!--").unwrap().1;
                 if let Some((comment, other)) = next_tag.split_once("-->") {
-                    res.push(Self::Comment(comment));
+                    res.push(Self::Comment(String::from(comment)));
                     target = other;
                     continue;
                 } else {
@@ -54,7 +54,7 @@ impl<'a> ParsedText<'a> {
             if next_tag.starts_with('!') {
                 let next_tag = next_tag.split_once("!").unwrap().1;
                 if let Some((doc_type, other)) = next_tag.split_once('>') {
-                    res.push(Self::DocType(doc_type));
+                    res.push(Self::DocType(String::from(doc_type)));
                     target = other;
                     continue;
                 } else {
@@ -80,20 +80,20 @@ impl<'a> ParsedText<'a> {
         }
         Some(res)
     }
-    fn next_tag(target: &'a str, dest: &mut Vec<Self>) -> Option<&'a str> {
+    fn next_tag<'a, 'b>(target: &'a str, dest: &'b mut Vec<Self>) -> Option<&'a str> {
         if let Some((text, other)) = target.split_once('<') {
             if !text.is_empty() {
-                dest.push(Self::Text(text));
+                dest.push(Self::Text(String::from(text)));
             }
             Some(other)
         } else {
-            dest.push(Self::Text(target));
+            dest.push(Self::Text(String::from(target)));
             None
         }
     }
 }
 
-impl<'a> Display for ParsedText<'a> {
+impl Display for ParsedText {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
         match self {
             Self::Text(v) => {
