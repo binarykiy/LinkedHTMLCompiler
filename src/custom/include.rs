@@ -1,9 +1,10 @@
 use std::collections::VecDeque;
 use crate::config::Config;
 use crate::{parse, read_all};
-use crate::parse::{ParsedTag, ParsedText};
+use crate::parse::token::Token;
+use crate::parse::tag::Tag;
 
-pub fn run(mut source: ParsedTag, config: &mut Config) -> Option<Vec<ParsedText>> {
+pub fn run(mut source: Tag, config: &mut Config) -> Option<Vec<Token>> {
     let mut res = None;
     source.consume("link", |value| {
         let link = value.trim_matches('"');
@@ -14,7 +15,7 @@ pub fn run(mut source: ParsedTag, config: &mut Config) -> Option<Vec<ParsedText>
         let mut begin = len;
         let mut end = len;
         for i in 0..len {
-            if let ParsedText::Tag(tag) = &parsed[i] {
+            if let Token::Tag(tag) = &parsed[i] {
                 if tag.tag() == "body" {
                     if begin == len {
                         begin = i;

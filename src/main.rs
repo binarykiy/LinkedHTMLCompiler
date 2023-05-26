@@ -6,8 +6,9 @@ use std::fs::OpenOptions;
 use std::{io, mem, process};
 use std::io::{BufRead, Read};
 use std::path::Path;
+use parse::tag::Tag;
 use crate::config::Config;
-use crate::parse::{ParsedTag, ParsedText};
+use parse::token::Token;
 
 fn main() {
     println!("Enter file path to compile:");
@@ -32,16 +33,16 @@ fn read_all<P: AsRef<Path>>(name: P) -> io::Result<String> {
     Ok(input)
 }
 
-fn parse(source: &str, config: &mut Config) -> Vec<ParsedText> {
-    let mut parsed = ParsedText::parse(source).unwrap_or_else(|| {
+fn parse(source: &str, config: &mut Config) -> Vec<Token> {
+    let mut parsed = Token::parse(source).unwrap_or_else(|| {
         process::exit(0);
     });
     let len = parsed.len();
     for i in 0..len {
-        if let ParsedText::CustomTag(_) = &parsed[i] {
-            let mut swap_dest = ParsedText::Null;
+        if let Token::CustomTag(_) = &parsed[i] {
+            let mut swap_dest = Token::Null;
             mem::swap(&mut swap_dest, &mut parsed[i]);
-            let ParsedText::CustomTag(tag) = swap_dest else { unreachable!() };
+            let Token::CustomTag(tag) = swap_dest else { unreachable!() };
             let ptr = convert_custom(tag, config);
             parsed[i] = ptr;
         }
@@ -49,15 +50,15 @@ fn parse(source: &str, config: &mut Config) -> Vec<ParsedText> {
     parsed
 }
 
-fn convert_custom(source: ParsedTag, config: &mut Config) -> ParsedText {
+fn convert_custom(source: Tag, config: &mut Config) -> Token {
     if let Some(v) = compile_custom(source, config) {
-        ParsedText::Pointer(v)
+        Token::Pointer(v)
     } else {
-        ParsedText::Comment(String::from("?error"))
+        Token::Comment(String::from("?error"))
     }
 }
 
-fn compile_custom(source: ParsedTag, config: &mut Config) -> Option<Vec<ParsedText>> {
+fn compile_custom(source: Tag, config: &mut Config) -> Option<Vec<Token>> {
     match source.tag() {
         "include" => {
             custom::include(source, config)
