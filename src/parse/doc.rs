@@ -104,9 +104,6 @@ impl Doc {
             }
         }
     }
-    pub fn len(&self) -> usize {
-        self.doc.len()
-    }
     pub fn find(&self, tag_name: &str) -> Vec<usize> {
         let mut vec = Vec::new();
         let len = self.doc.len();
@@ -117,14 +114,6 @@ impl Doc {
             }
         }
         vec
-    }
-    pub fn find_tag<F: FnMut(usize, &Tag)>(&mut self, mut func: F) {
-        let len = self.doc.len();
-        for i in 0..len {
-            if let Token::Tag(tag) = &self[i] {
-                func(i, tag);
-            }
-        }
     }
     pub fn reassign_custom<F: FnMut(Tag) -> Token>(&mut self, mut func: F) {
         let len = self.doc.len();
