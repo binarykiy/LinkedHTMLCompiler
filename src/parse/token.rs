@@ -41,10 +41,7 @@ impl Display for Token {
                 write!(fmt, "<!{}>", v)
             }
             Self::Pointer(v) => {
-                for i in 0..v.len() {
-                    write!(fmt, "{}", v[i])?;
-                }
-                Ok(())
+                write!(fmt, "{}", v)
             }
             Self::Null => {
                 // null cannot format
