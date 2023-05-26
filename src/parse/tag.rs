@@ -24,7 +24,11 @@ impl Tag {
         }
     }
     fn parse_attributes(&mut self, raw_attr: &str) -> bool {
+        // todo: avoid " " separating
         for attribute in raw_attr.split(' ') {
+            if attribute.is_empty() {
+                continue
+            }
             if let Some((key, value)) = Self::parse_single_attr(attribute) {
                 if !self.attr_key.contains(&key) {
                     self.attr_key.push(key);
