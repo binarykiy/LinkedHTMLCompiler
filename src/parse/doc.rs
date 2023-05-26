@@ -106,19 +106,20 @@ impl Doc {
     pub fn len(&self) -> usize {
         self.doc.len()
     }
-    pub fn for_each_tag<F: FnMut(usize, &Tag)>(&mut self, mut func: F) {
+    pub fn find_tag<F: FnMut(&Tag)>(&mut self, mut func: F) {
         let len = self.doc.len();
         for i in 0..len {
             if let Token::Tag(tag) = &self[i] {
-                func(i, tag);
+                func(tag);
             }
         }
     }
-    pub fn for_each_custom<F: FnMut(usize, &Tag)>(&mut self, mut func: F) {
+    pub fn reassign_custom<F: FnMut(Tag) -> Token>(&mut self, mut func: F) {
         let len = self.doc.len();
         for i in 0..len {
-            if let Token::CustomTag(tag) = &self[i] {
-                func(i, tag);
+            if let Token::CustomTag(_) = &self[i] {
+                let Token::CustomTag(tag) = self[i].swap_null() else { unreachable!() };
+                self[i] = func(tag);
             }
         }
     }
