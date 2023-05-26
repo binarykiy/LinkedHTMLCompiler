@@ -1,7 +1,6 @@
 use crate::config::Config;
 use crate::{parse, read_all};
 use crate::parse::doc::Doc;
-use crate::parse::token::Token;
 use crate::parse::tag::Tag;
 
 pub fn run(mut source: Tag, config: &mut Config) -> Option<Doc> {
@@ -14,25 +13,29 @@ pub fn run(mut source: Tag, config: &mut Config) -> Option<Doc> {
         let len = parsed.len();
         let mut begin = len;
         let mut end = len;
-        for i in 0..len {
-            if let Token::Tag(tag) = &parsed[i] {
-                if tag.tag() == "body" {
-                    if begin == len {
-                        begin = i;
-                    } else {
-                        eprintln!("[ERROR] Duplicate <body> tags found");
-                        return;
-                    }
-                }
-                if tag.tag() == "/body" {
-                    if end == len {
-                        end = i;
-                    } else {
-                        eprintln!("[ERROR] Duplicate </body> tags found");
-                        return;
-                    }
+        let mut err = false;
+        parsed.find_tag(|i, tag| {
+            if tag.tag() == "body" {
+                if begin == len {
+                    begin = i;
+                } else {
+                    eprintln!("[ERROR] Duplicate <body> tags found");
+                    err = true;
+                    return;
                 }
             }
+            if tag.tag() == "/body" {
+                if end == len {
+                    end = i;
+                } else {
+                    eprintln!("[ERROR] Duplicate </body> tags found");
+                    err = true;
+                    return;
+                }
+            }
+        });
+        if err {
+            return;
         }
         if begin == len && end == len {
             res = Some(parsed);
