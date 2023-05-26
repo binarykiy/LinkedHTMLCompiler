@@ -21,10 +21,7 @@ fn main() {
         .expect("Failed to open the file to compile.");
     let mut cfg = Config::init(name);
     let doc = parse(source.as_str(), &mut cfg);
-    let len = doc.len();
-    for i in 0..len {
-        cfg.write_all(format!("{}", doc[i]));
-    }
+    cfg.write_all(format!("{}", doc))
 }
 
 fn read_all<P: AsRef<Path>>(name: P) -> io::Result<String> {
