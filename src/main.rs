@@ -41,9 +41,7 @@ fn parse(source: &str, config: &mut Config) -> Doc {
     let len = parsed.len();
     for i in 0..len {
         if let Token::CustomTag(_) = &parsed[i] {
-            let mut swap_dest = Token::Null;
-            mem::swap(&mut swap_dest, &mut parsed[i]);
-            let Token::CustomTag(tag) = swap_dest else { unreachable!() };
+            let Token::CustomTag(tag) = parsed[i].swap_null() else { unreachable!() };
             let ptr = convert_custom(tag, config);
             parsed[i] = ptr;
         }

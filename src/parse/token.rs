@@ -1,5 +1,5 @@
 use std::fmt::{Display, Formatter};
-use std::fmt;
+use std::{fmt, mem};
 use crate::parse::doc::Doc;
 use crate::parse::tag::Tag;
 
@@ -12,6 +12,14 @@ pub enum Token {
     DocType(String),
     Pointer(Doc),
     Null,
+}
+
+impl Token {
+    pub fn swap_null(&mut self) -> Self {
+        let mut dest = Self::Null;
+        mem::swap(self, &mut dest);
+        dest
+    }
 }
 
 impl Display for Token {
