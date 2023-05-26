@@ -35,7 +35,7 @@ fn read_all<P: AsRef<Path>>(name: P) -> io::Result<String> {
 }
 
 fn parse(source: &str, config: &mut Config) -> Doc {
-    let mut parsed = Token::parse(source).unwrap_or_else(|| {
+    let mut parsed = Doc::parse(source).unwrap_or_else(|| {
         process::exit(0);
     });
     let len = parsed.len();
@@ -48,7 +48,7 @@ fn parse(source: &str, config: &mut Config) -> Doc {
             parsed[i] = ptr;
         }
     }
-    Doc::from_vec(parsed)
+    parsed
 }
 
 fn convert_custom(source: Tag, config: &mut Config) -> Token {

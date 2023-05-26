@@ -1,4 +1,4 @@
-use std::ops::Index;
+use std::ops::{Index, IndexMut};
 use crate::parse::tag::Tag;
 use crate::parse::token::Token;
 
@@ -107,5 +107,11 @@ impl Index<usize> for Doc {
 
     fn index(&self, index: usize) -> &Self::Output {
         self.doc.index(index)
+    }
+}
+
+impl IndexMut<usize> for Doc {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        self.doc.index_mut(index)
     }
 }
