@@ -1,4 +1,3 @@
-use std::collections::VecDeque;
 use crate::config::Config;
 use crate::{parse, read_all};
 use crate::parse::doc::Doc;
