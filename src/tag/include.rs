@@ -3,7 +3,7 @@ use crate::config::Config;
 use crate::{parse, read_all};
 use crate::util::{ParsedTag, ParsedText};
 
-pub fn run<'a>(mut source: ParsedTag<'a>, config: &mut Config) -> Option<Vec<ParsedText<'a>>> {
+pub fn run<'a>(mut source: ParsedTag, config: &mut Config) -> Option<Vec<ParsedText<'a>>> {
     let mut res = None;
     source.consume("link", |value| {
         let link = value.trim_matches('"');

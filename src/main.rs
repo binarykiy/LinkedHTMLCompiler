@@ -49,7 +49,7 @@ fn parse<'a, 'b>(source: &'a str, config: &'b mut Config) -> Vec<ParsedText<'a>>
     parsed
 }
 
-fn convert_custom<'a>(source: ParsedTag<'a>, config: &mut Config) -> ParsedText<'a> {
+fn convert_custom<'a>(source: ParsedTag, config: &mut Config) -> ParsedText<'a> {
     if let Some(v) = compile_custom(source, config) {
         ParsedText::Pointer(v)
     } else {
@@ -57,7 +57,7 @@ fn convert_custom<'a>(source: ParsedTag<'a>, config: &mut Config) -> ParsedText<
     }
 }
 
-fn compile_custom<'a>(source: ParsedTag<'a>, config: &mut Config) -> Option<Vec<ParsedText<'a>>> {
+fn compile_custom<'a>(source: ParsedTag, config: &mut Config) -> Option<Vec<ParsedText<'a>>> {
     match source.tag() {
         "include" => {
             tag::include(source, config)

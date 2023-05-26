@@ -6,8 +6,8 @@ use std::fmt::{Debug, Display, Formatter};
 pub enum ParsedText<'a> {
     Text(&'a str),
     Comment(&'a str),
-    Tag(ParsedTag<'a>),
-    CustomTag(ParsedTag<'a>),
+    Tag(ParsedTag),
+    CustomTag(ParsedTag),
     DocType(&'a str),
     Pointer(Vec<ParsedText<'a>>),
     Null,
@@ -126,17 +126,17 @@ impl<'a> Display for ParsedText<'a> {
 }
 
 #[derive(Debug)]
-pub struct ParsedTag<'a> {
-    tag: &'a str,
-    attributes: HashMap<&'a str, &'a str>,
+pub struct ParsedTag {
+    tag: String,
+    attributes: HashMap<String, String>,
 }
 
-impl<'a> ParsedTag<'a> {
-    pub fn new(str_inside: &'a str) -> Option<Self> {
+impl ParsedTag {
+    pub fn new(str_inside: &str) -> Option<Self> {
         let (tag, raw_attr) = str_inside.split_once(' ')
             .unwrap_or((str_inside, ""));
         let mut res = Self {
-            tag,
+            tag: String::from(tag),
             attributes: HashMap::new(),
         };
         if res.parse_raw_attr(raw_attr) {
@@ -145,11 +145,11 @@ impl<'a> ParsedTag<'a> {
             None
         }
     }
-    fn parse_raw_attr(&mut self, raw_attr: &'a str) -> bool {
+    fn parse_raw_attr(&mut self, raw_attr: &str) -> bool {
         for attribute in raw_attr.split(' ') {
             if let Some((key, value)) = attribute.split_once('=') {
-                if !self.attributes.contains_key(&key) {
-                    self.attributes.insert(key, value);
+                if !self.attributes.contains_key(key) {
+                    self.attributes.insert(String::from(key), String::from(value));
                 } else {
                     eprintln!("[WARN] Duplicate attribute key found: {}", key);
                 }
@@ -161,25 +161,25 @@ impl<'a> ParsedTag<'a> {
         true
     }
     pub fn tag(&self) -> &str {
-        self.tag
+        &self.tag[..]
     }
-    pub fn consume<F: FnOnce(&'a str)>(&mut self, key: &str, consumer: F) {
+    pub fn consume<F: FnOnce(String)>(&mut self, key: &str, consumer: F) {
         self.consume_or(key, consumer, || {});
     }
-    pub fn consume_or<F: FnOnce(&'a str), G: FnOnce()>(&mut self, key: &str, consumer: F, or: G) {
+    pub fn consume_or<F: FnOnce(String), G: FnOnce()>(&mut self, key: &str, consumer: F, or: G) {
         match self.attributes.remove(key) {
             Some(v) => consumer(v),
             None => or(),
         }
     }
     pub fn clean(self) {
-        for attr in self.attributes {
-            eprintln!("[WARN] Attribute '{}' does not work in Tag '{}'", attr.0, self.tag);
+        for (key, _) in self.attributes {
+            eprintln!("[WARN] Attribute '{}' does not work in Tag '{}'", key, self.tag);
         }
     }
 }
 
-impl<'a> Display for ParsedTag<'a> {
+impl Display for ParsedTag {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
         let mut buf = self.tag.to_string();
         for (key, value) in &self.attributes {
