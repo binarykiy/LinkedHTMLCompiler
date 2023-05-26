@@ -89,7 +89,7 @@ impl Doc {
         }
     }
     pub fn extract<R: RangeBounds<usize>>(&mut self, range: R) {
-        let triggered = false;
+        let mut triggered = false;
         let len = self.doc.len();
         for i in 0..len {
             if !range.contains(&i) {
@@ -98,6 +98,8 @@ impl Doc {
                 } else {
                     self.doc.pop_front();
                 }
+            } else {
+                triggered = true;
             }
         }
     }
