@@ -10,42 +10,33 @@ pub fn run(mut source: Tag, config: &mut Config) -> Option<Doc> {
         let source = read_all(config.relative_path(link))
             .expect(format!("[ERROR] Failed to read the linked file: {}", value).as_str());
         let mut parsed = parse::parse(source.as_str(), config);
-        let len = parsed.len();
-        let mut begin = len;
-        let mut end = len;
-        let mut err = false;
-        parsed.find_tag(|i, tag| {
-            if tag.tag() == "body" {
-                if begin == len {
-                    begin = i;
-                } else {
-                    eprintln!("[ERROR] Duplicate <body> tags found");
-                    err = true;
-                    return;
-                }
-            }
-            if tag.tag() == "/body" {
-                if end == len {
-                    end = i;
-                } else {
-                    eprintln!("[ERROR] Duplicate </body> tags found");
-                    err = true;
-                    return;
-                }
-            }
-        });
-        if err {
-            return;
+        let begin = parsed.find("body");
+        let end = parsed.find("/body");
+        validate_body_tag(&begin, &end);
+        if begin.len() == 1 && begin.len() == 1 {
+            parsed.extract(begin[0]+1..end[0]);
         }
-        if begin == len && end == len {
-            res = Some(parsed);
-            return;
-        }
-        if begin != len && end != len {
-            parsed.extract(begin+1..end);
-            res = Some(parsed);
-            return;
-        }
+        res = Some(parsed);
     });
     res
+}
+
+fn validate_body_tag(begin: &Vec<usize>, end: &Vec<usize>) -> bool {
+    if begin.len() > 1 {
+        eprintln!("[ERROR] Duplicate <body> tags found");
+        return false
+    }
+    if end.len() > 1 {
+        eprintln!("[ERROR] Duplicate </body> tags found");
+        return false
+    }
+    if begin.is_empty() && !end.is_empty() {
+        eprintln!("[ERROR] Did not found <body> for </body>");
+        return false
+    }
+    if !begin.is_empty() && end.is_empty() {
+        eprintln!("[ERROR] Did not found </body> for <body>");
+        return false
+    }
+    true
 }
