@@ -9,16 +9,6 @@ pub struct Doc {
 }
 
 impl Doc {
-    #[deprecated]
-    pub fn from_vec(vec: Vec<Token>) -> Self {
-        Self {
-            doc: vec.into(),
-        }
-    }
-    #[deprecated]
-    pub fn to_vec(self) -> Vec<Token> {
-        self.doc.into()
-    }
     pub fn parse(doc: &str) -> Option<Self> {
         let mut res = Vec::new();
         let mut target = doc;
