@@ -38,14 +38,9 @@ fn parse(source: &str, config: &mut Config) -> Doc {
     let mut parsed = Doc::parse(source).unwrap_or_else(|| {
         process::exit(0);
     });
-    let len = parsed.len();
-    for i in 0..len {
-        if let Token::CustomTag(_) = &parsed[i] {
-            let Token::CustomTag(tag) = parsed[i].swap_null() else { unreachable!() };
-            let ptr = convert_custom(tag, config);
-            parsed[i] = ptr;
-        }
-    }
+    parsed.reassign_custom(|tag| {
+        convert_custom(tag, config)
+    });
     parsed
 }
 
