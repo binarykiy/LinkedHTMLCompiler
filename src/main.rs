@@ -6,7 +6,7 @@ mod util;
 use std::fs::OpenOptions;
 use std::io;
 use std::io::{BufRead, Read};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use crate::config::Config;
 
 fn main() {
@@ -15,9 +15,9 @@ fn main() {
     io::stdin().lock().read_line(&mut name)
         .expect("Failed to read the input");
     name.retain(|c| c != '\r' && c != '\n' && c != '"');
-    let source = read_all(&name)
+    let mut cfg = Config::init(name.clone());
+    let source = cfg.read_absolute(PathBuf::from(name))
         .expect("Failed to open the file to compile.");
-    let mut cfg = Config::init(name);
     let doc = parse::parse(source, &mut cfg);
     cfg.write_all(format!("{}", doc))
 }
