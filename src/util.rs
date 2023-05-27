@@ -2,8 +2,8 @@ use std::mem;
 
 pub struct Lazy<K, T> {
     func: fn(K) -> T,
-    key: K,
-    inner: T,
+    key: Option<K>,
+    inner: Option<T>,
     initialized: bool,
 }
 
@@ -11,10 +11,8 @@ impl<K, T> Lazy<K, T> {
     pub fn new(func: fn(K) -> T, key: K) -> Self {
         Self {
             func,
-            key,
-            // SAFETY: All of inner access occurred
-            //         after inner initialized
-            inner: unsafe { mem::zeroed() },
+            key: Some(key),
+            inner: None,
             initialized: false,
         }
     }
@@ -23,16 +21,15 @@ impl<K, T> Lazy<K, T> {
     }
     pub fn get_mut(&mut self) -> &mut T {
         if !self.initialized {
-            // SAFETY: All of key access occurred
-            //         before inner initialized
-            let key = unsafe { self.get_key() };
-            self.inner = (self.func)(key);
+            let key = self.get_key();
+            self.inner = Some((self.func)(key));
             self.initialized = true;
         }
-        &mut self.inner
+        let Some(inner) = &mut self.inner else { unreachable!() };
+        inner
     }
-    unsafe fn get_key(&mut self) -> K {
-        mem::replace(&mut self.key, mem::zeroed())
+    fn get_key(&mut self) -> K {
+        mem::replace(&mut self.key, None).unwrap()
     }
 }
 

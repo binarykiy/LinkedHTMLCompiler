@@ -30,7 +30,7 @@ impl Config {
     }
     pub fn write_all<S: AsRef<str>>(&mut self, text: S) {
         self.out.get_mut().write_all(text.as_ref().as_bytes())
-            .expect("[FATAL] Failed to write text to the output file.");
+                .expect("[FATAL] Failed to write text to the output file.");
     }
     pub fn read_relative<P: AsRef<Path>>(&mut self, path: P) -> io::Result<Rc<String>> {
         self.read_absolute(self.workspace.join(path))
