@@ -1,3 +1,37 @@
+use std::mem;
+
+pub struct Lazy<K, T> {
+    func: fn(K) -> T,
+    key: K,
+    inner: T,
+    initialized: bool,
+}
+
+impl<K, T> Lazy<K, T> {
+    pub fn new(func: fn(K) -> T, key: K) -> Self {
+        Self {
+            func,
+            key,
+            inner: unsafe { mem::zeroed() },
+            initialized: false,
+        }
+    }
+    pub fn is_initialized(&self) -> bool {
+        self.initialized
+    }
+    pub fn get_mut(&mut self) -> &mut T {
+        if !self.initialized {
+            let key = unsafe { self.get_key() };
+            self.inner = (self.func)(key);
+            self.initialized = true;
+        }
+        &mut self.inner
+    }
+    unsafe fn get_key(&mut self) -> K {
+        mem::replace(&mut self.key, mem::zeroed())
+    }
+}
+
 #[derive(Debug)]
 pub struct VecDict<K: PartialEq, V> {
     dict: Vec<(K, V)>,
