@@ -1,6 +1,7 @@
 mod config;
 mod custom;
 mod parse;
+mod util;
 
 use std::fs::OpenOptions;
 use std::io;
