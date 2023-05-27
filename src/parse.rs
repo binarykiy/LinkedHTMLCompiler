@@ -1,4 +1,5 @@
 use std::process;
+use std::rc::Rc;
 use crate::config::Config;
 use crate::custom;
 use crate::parse::doc::Doc;
@@ -9,7 +10,7 @@ pub mod tag;
 pub mod token;
 pub mod doc;
 
-pub fn parse(source: String, cfg: &mut Config) -> Doc {
+pub fn parse(source: Rc<String>, cfg: &mut Config) -> Doc {
     let mut doc = Doc::parse(source).unwrap_or_else(|| {
         process::exit(0);
     });

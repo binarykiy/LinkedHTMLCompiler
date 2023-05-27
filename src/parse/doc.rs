@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 use std::fmt::{Display, Formatter};
 use std::ops::{Index, IndexMut, RangeBounds};
+use std::rc::Rc;
 use crate::parse::tag::Tag;
 use crate::parse::token::Token;
 
@@ -10,7 +11,7 @@ pub struct Doc {
 }
 
 impl Doc {
-    pub fn parse(doc: String) -> Option<Self> {
+    pub fn parse(doc: Rc<String>) -> Option<Self> {
         let mut res = Vec::new();
         let mut target = doc.as_str();
         while let Some(next_tag) = Self::next_tag(target, &mut res) {
