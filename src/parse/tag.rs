@@ -78,7 +78,7 @@ impl Tag {
     }
     pub fn move_value(&mut self, key: &str) -> Option<String> {
         let mut dest = String::new();
-        mem::swap(self.attributes.get_mut(&key.to_string())?, &mut dest);
+        mem::swap(self.attributes.get_mut(key)?, &mut dest);
         Some(dest)
     }
     pub fn clean(self) {

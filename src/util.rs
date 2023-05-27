@@ -14,19 +14,19 @@ impl<K: PartialEq, V> VecDict<K, V> {
             self.dict.push((key, value));
         }
     }
-    pub fn contains(&self, key: &K) -> bool {
+    pub fn contains<T: PartialEq<K> + ?Sized>(&self, key: &T) -> bool {
         let len = self.dict.len();
         for i in 0..len {
-            if self.dict[i].0 == *key {
+            if *key == self.dict[i].0 {
                 return true
             }
         }
         false
     }
-    pub fn get_mut(&mut self, key: &K) -> Option<&mut V> {
+    pub fn get_mut<T: PartialEq<K> + ?Sized>(&mut self, key: &T) -> Option<&mut V> {
         let len = self.dict.len();
         for i in 0..len {
-            if self.dict[i].0 == *key {
+            if *key == self.dict[i].0 {
                 return Some(&mut self.dict[i].1)
             }
         }
