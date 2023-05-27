@@ -23,6 +23,15 @@ impl<K: PartialEq, V> VecDict<K, V> {
         }
         false
     }
+    pub fn get<T: PartialEq<K> + ?Sized>(&self, key: &T) -> Option<&V> {
+        let len = self.dict.len();
+        for i in 0..len {
+            if *key == self.dict[i].0 {
+                return Some(&self.dict[i].1)
+            }
+        }
+        None
+    }
     pub fn get_mut<T: PartialEq<K> + ?Sized>(&mut self, key: &T) -> Option<&mut V> {
         let len = self.dict.len();
         for i in 0..len {
