@@ -3,11 +3,11 @@ use std::io;
 use std::io::{BufReader, BufWriter, Read, Write};
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
-use crate::util::VecDict;
+use crate::util::{Lazy, VecDict};
 
 pub struct Config {
     workspace: PathBuf,
-    out: BufWriter<File>,
+    out: Lazy<PathBuf, BufWriter<File>>,
     src: VecDict<PathBuf, Rc<String>>,
 }
 
@@ -16,10 +16,12 @@ impl Config {
         let workspace = Path::new(&input).parent()
             .expect("[FATAL] Failed to open working directory")
             .to_path_buf();
-        let out = BufWriter::new(OpenOptions::new()
+        let out = Lazy::new(|path| {
+            BufWriter::new(OpenOptions::new()
             .create(true).truncate(true).write(true)
-            .open(workspace.join("out.html"))
-            .expect("[FATAL] Failed to open the output file"));
+            .open(path)
+            .expect("[FATAL] Failed to open the output file"))
+        }, workspace.join("out.html"));
         Self {
             workspace,
             out,
@@ -27,7 +29,7 @@ impl Config {
         }
     }
     pub fn write_all<S: AsRef<str>>(&mut self, text: S) {
-        self.out.write_all(text.as_ref().as_bytes())
+        self.out.get_mut().write_all(text.as_ref().as_bytes())
             .expect("[FATAL] Failed to write text to the output file.");
     }
     pub fn read_relative<P: AsRef<Path>>(&mut self, path: P) -> io::Result<Rc<String>> {
