@@ -11,7 +11,7 @@ pub struct Doc {
 }
 
 impl Doc {
-    pub fn parse(doc: Rc<String>) -> Option<Self> {
+    pub fn new(doc: Rc<String>) -> Option<Self> {
         let mut res = Vec::new();
         let mut target = doc.as_str();
         while let Some(next_tag) = Self::next_tag(target, &mut res) {

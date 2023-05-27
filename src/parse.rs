@@ -11,7 +11,7 @@ pub mod token;
 pub mod doc;
 
 pub fn parse(source: Rc<String>, cfg: &mut Config) -> Doc {
-    let mut doc = Doc::parse(source).unwrap_or_else(|| {
+    let mut doc = Doc::new(source).unwrap_or_else(|| {
         process::exit(0);
     });
     doc.reassign_custom(|tag| {
