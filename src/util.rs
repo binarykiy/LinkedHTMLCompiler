@@ -12,6 +12,8 @@ impl<K, T> Lazy<K, T> {
         Self {
             func,
             key,
+            // SAFETY: All of inner access occurred
+            //         after inner initialized
             inner: unsafe { mem::zeroed() },
             initialized: false,
         }
@@ -21,6 +23,8 @@ impl<K, T> Lazy<K, T> {
     }
     pub fn get_mut(&mut self) -> &mut T {
         if !self.initialized {
+            // SAFETY: All of key access occurred
+            //         before inner initialized
             let key = unsafe { self.get_key() };
             self.inner = (self.func)(key);
             self.initialized = true;
