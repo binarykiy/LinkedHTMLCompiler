@@ -1,10 +1,14 @@
 use std::fs::{File, OpenOptions};
-use std::io::{BufWriter, Write};
+use std::io;
+use std::io::{BufReader, BufWriter, Read, Write};
 use std::path::{Path, PathBuf};
+use std::rc::Rc;
+use crate::util::VecDict;
 
 pub struct Config {
     workspace: PathBuf,
     out: BufWriter<File>,
+    src: VecDict<PathBuf, Rc<String>>,
 }
 
 impl Config {
@@ -19,6 +23,7 @@ impl Config {
         Self {
             workspace,
             out,
+            src: VecDict::new(),
         }
     }
     pub fn relative_path<P: AsRef<Path>>(&self, path: P) -> PathBuf {
@@ -27,5 +32,16 @@ impl Config {
     pub fn write_all<S: AsRef<str>>(&mut self, text: S) {
         self.out.write_all(text.as_ref().as_bytes())
             .expect("[FATAL] Failed to write text to the output file.");
+    }
+    pub fn read_absolute<P: AsRef<Path>>(&mut self, path: P) -> io::Result<Rc<String>> {
+        let path = PathBuf::from(path.as_ref());
+        if self.src.get(&path) == None {
+            let mut file = BufReader::new(
+                OpenOptions::new().read(true).open(&path)?);
+            let mut buf = String::new();
+            file.read_to_string(&mut buf)?;
+            self.src.push_unique(path.clone(), Rc::new(buf));
+        }
+        Ok(Rc::clone(self.src.get(&path).unwrap()))
     }
 }
