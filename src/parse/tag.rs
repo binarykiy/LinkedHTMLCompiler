@@ -1,11 +1,11 @@
 use std::fmt::{Display, Formatter};
 use std::{fmt, mem, str};
+use crate::util::VecDict;
 
 #[derive(Debug)]
 pub struct Tag {
     tag: String,
-    attr_key: Vec<String>,
-    attr_value: Vec<String>,
+    attributes: VecDict<String, String>,
 }
 
 impl Tag {
@@ -14,8 +14,7 @@ impl Tag {
             .unwrap_or((str_inside, ""));
         let mut res = Self {
             tag: String::from(tag),
-            attr_key: Vec::new(),
-            attr_value: Vec::new(),
+            attributes: VecDict::new(),
         };
         let attributes = raw_attr.as_bytes();
         let len = attributes.len();
@@ -59,9 +58,8 @@ impl Tag {
         }
     }
     fn push_attribute(&mut self, key: String, value: String) {
-        if !self.attr_key.contains(&key) {
-            self.attr_key.push(key);
-            self.attr_value.push(String::from(value));
+        if !self.attributes.contains(&key) {
+            self.attributes.push_unique(key, String::from(value));
         } else {
             eprintln!("[WARN] Duplicate attribute key found: {}", key);
         }
@@ -79,31 +77,26 @@ impl Tag {
         }
     }
     pub fn move_value(&mut self, key: &str) -> Option<String> {
-        for i in 0..self.attr_key.len() {
-            if self.attr_key[i] == key {
-                let mut dest = String::new();
-                mem::swap(&mut self.attr_value[i], &mut dest);
-                return Some(dest);
-            }
-        }
-        None
+        let mut dest = String::new();
+        mem::swap(self.attributes.get_mut(&key.to_string())?, &mut dest);
+        Some(dest)
     }
     pub fn clean(self) {
-        for key in self.attr_key {
+        self.attributes.for_each(|key, _| {
             eprintln!("[WARN] Attribute '{}' does not work in Tag '{}'", key, self.tag);
-        }
+        });
     }
 }
 
 impl Display for Tag {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
         let mut buf = self.tag.to_string();
-        for i in 0..self.attr_key.len() {
+        self.attributes.for_each(|key, value| {
             buf += " ";
-            buf += self.attr_key[i].as_str();
+            buf += key;
             buf += "=";
-            buf += self.attr_value[i].as_str();
-        }
+            buf += value;
+        });
         write!(fmt, "{}", buf)
     }
 }
