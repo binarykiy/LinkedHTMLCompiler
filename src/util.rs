@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct VecDict<K: PartialEq, V> {
     dict: Vec<(K, V)>,
 }
