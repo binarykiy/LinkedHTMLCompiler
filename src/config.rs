@@ -26,9 +26,6 @@ impl Config {
             src: VecDict::new(),
         }
     }
-    pub fn relative_path<P: AsRef<Path>>(&self, path: P) -> PathBuf {
-        self.workspace.join(path)
-    }
     pub fn write_all<S: AsRef<str>>(&mut self, text: S) {
         self.out.write_all(text.as_ref().as_bytes())
             .expect("[FATAL] Failed to write text to the output file.");

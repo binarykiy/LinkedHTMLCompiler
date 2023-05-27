@@ -3,10 +3,9 @@ mod custom;
 mod parse;
 mod util;
 
-use std::fs::OpenOptions;
 use std::io;
-use std::io::{BufRead, Read};
-use std::path::{Path, PathBuf};
+use std::io::BufRead;
+use std::path::PathBuf;
 use crate::config::Config;
 
 fn main() {
@@ -20,12 +19,4 @@ fn main() {
         .expect("Failed to open the file to compile.");
     let doc = parse::parse(source, &mut cfg);
     cfg.write_all(format!("{}", doc))
-}
-
-fn read_all<P: AsRef<Path>>(name: P) -> io::Result<String> {
-    let path = Path::new(name.as_ref());
-    let mut file = OpenOptions::new().read(true).open(path)?;
-    let mut buf = String::new();
-    file.read_to_string(&mut buf)?;
-    Ok(buf)
 }
