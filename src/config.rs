@@ -33,6 +33,9 @@ impl Config {
         self.out.write_all(text.as_ref().as_bytes())
             .expect("[FATAL] Failed to write text to the output file.");
     }
+    pub fn read_relative<P: AsRef<Path>>(&mut self, path: P) -> io::Result<Rc<String>> {
+        self.read_absolute(self.workspace.join(path))
+    }
     pub fn read_absolute(&mut self, path: PathBuf) -> io::Result<Rc<String>> {
         if self.src.get(&path) == None {
             let mut file = BufReader::new(
