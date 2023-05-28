@@ -5,7 +5,6 @@ mod util;
 
 use std::io;
 use std::io::BufRead;
-use std::path::PathBuf;
 use std::time::Instant;
 use crate::config::Config;
 
