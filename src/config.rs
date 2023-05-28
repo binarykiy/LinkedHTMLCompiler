@@ -12,7 +12,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn init(input: String) -> Self {
+    pub fn new(input: String) -> Self {
         let workspace = Path::new(&input).parent()
             .expect("[FATAL] Failed to open working directory")
             .to_path_buf();
