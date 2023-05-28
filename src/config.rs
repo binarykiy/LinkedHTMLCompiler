@@ -37,7 +37,7 @@ impl Config {
     pub fn read_relative<P: AsRef<Path>>(&mut self, path: P) -> io::Result<Rc<String>> {
         self.read_absolute(self.workspace.join(path))
     }
-    pub fn read_absolute(&mut self, path: PathBuf) -> io::Result<Rc<String>> {
+    fn read_absolute(&mut self, path: PathBuf) -> io::Result<Rc<String>> {
         if self.src.get(&path) == None {
             let mut file = BufReader::new(
                 OpenOptions::new().read(true).open(&path)?);
