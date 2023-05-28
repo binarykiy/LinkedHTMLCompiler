@@ -17,9 +17,8 @@ fn main() {
     println!("[INFO] Compilation started.");
     let timer = Instant::now();
     name.retain(|c| c != '\r' && c != '\n' && c != '"');
-    let mut cfg = Config::new(name.clone());
-    let source = cfg.read_absolute(PathBuf::from(name))
-        .expect("Failed to open the file to compile.");
+    let (mut cfg, Ok(source)) = Config::new(name.clone())
+        else { panic!("Failed to open the file to compile.") };
     let doc = parse::parse(source, &mut cfg);
     cfg.write_all(format!("{}", doc));
     println!("[INFO] Compilation finished. Time = {:?}", timer.elapsed());

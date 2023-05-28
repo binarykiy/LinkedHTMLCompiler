@@ -12,7 +12,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(input: String) -> Self {
+    pub fn new(input: String) -> (Self, io::Result<Rc<String>>) {
         let workspace = Path::new(&input).parent()
             .expect("[FATAL] Failed to open working directory")
             .to_path_buf();
@@ -22,11 +22,13 @@ impl Config {
             .open(path)
             .expect("[FATAL] Failed to open the output file"))
         }, workspace.join("out.html"));
-        Self {
+        let mut cfg = Self {
             workspace,
             out,
             src: VecDict::new(),
-        }
+        };
+        let source = cfg.read_absolute(PathBuf::from(input));
+        (cfg, source)
     }
     pub fn write_all<S: AsRef<str>>(&mut self, text: S) {
         self.out.get_mut().write_all(text.as_ref().as_bytes())
