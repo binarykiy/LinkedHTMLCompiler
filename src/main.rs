@@ -3,16 +3,13 @@ mod custom;
 mod parse;
 mod util;
 
-use std::io;
-use std::io::BufRead;
 use std::time::Instant;
 use crate::config::Config;
+use crate::util::read_from_stdin;
 
 fn main() {
     println!("Enter file path to compile:");
-    let mut name = String::new();
-    io::stdin().lock().read_line(&mut name)
-        .expect("Failed to read the input");
+    let mut name = read_from_stdin().expect("Failed to read the input");
     println!("[INFO] Compilation started.");
     let timer = Instant::now();
     name.retain(|c| c != '\r' && c != '\n' && c != '"');

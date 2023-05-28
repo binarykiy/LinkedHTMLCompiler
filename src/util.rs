@@ -1,4 +1,11 @@
-use std::mem;
+use std::{io, mem};
+use std::io::{BufRead, BufReader};
+
+pub fn read_from_stdin() -> io::Result<String> {
+    let mut buf = String::new();
+    BufReader::new(io::stdin().lock()).read_line(&mut buf)?;
+    Ok(buf)
+}
 
 pub struct Lazy<K, T> {
     func: fn(K) -> T,
