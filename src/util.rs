@@ -4,7 +4,6 @@ pub struct Lazy<K, T> {
     func: fn(K) -> T,
     key: Option<K>,
     inner: Option<T>,
-    initialized: bool,
 }
 
 impl<K, T> Lazy<K, T> {
@@ -13,17 +12,12 @@ impl<K, T> Lazy<K, T> {
             func,
             key: Some(key),
             inner: None,
-            initialized: false,
         }
     }
-    pub fn is_initialized(&self) -> bool {
-        self.initialized
-    }
     pub fn get_mut(&mut self) -> &mut T {
-        if !self.initialized {
+        if let None = self.inner {
             let key = self.get_key();
             self.inner = Some((self.func)(key));
-            self.initialized = true;
         }
         let Some(inner) = &mut self.inner else { unreachable!() };
         inner
