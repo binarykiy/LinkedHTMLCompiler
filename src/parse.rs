@@ -3,7 +3,7 @@ use std::rc::Rc;
 use crate::config::Config;
 use crate::custom;
 use crate::parse::doc::Doc;
-use crate::parse::token::Token;
+use crate::parse::token::Component;
 
 pub mod tag;
 pub mod token;
@@ -15,9 +15,9 @@ pub fn parse(source: Rc<String>, cfg: &mut Config) -> Doc {
     });
     doc.reassign_custom(|tag| {
         if let Some(v) = custom::run(tag, cfg) {
-            Token::Pointer(v)
+            Component::Pointer(v)
         } else {
-            Token::Comment(String::from("?error"))
+            Component::Comment(String::from("?error"))
         }
     });
     doc

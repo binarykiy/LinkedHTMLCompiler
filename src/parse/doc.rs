@@ -3,11 +3,11 @@ use std::fmt::{Display, Formatter};
 use std::ops::{Index, IndexMut, RangeBounds};
 use std::rc::Rc;
 use crate::parse::tag::Tag;
-use crate::parse::token::Token;
+use crate::parse::token::Component;
 
 #[derive(Debug)]
 pub struct Doc {
-    doc: VecDeque<Token>,
+    doc: VecDeque<Component>,
 }
 
 impl Doc {
@@ -20,7 +20,7 @@ impl Doc {
                 let next_tag = next_tag.split_once("!--?").unwrap().1;
                 if let Some((raw_tag, other)) = next_tag.split_once("-->") {
                     if let Some(tag) = Tag::new(raw_tag) {
-                        res.push(Token::CustomTag(tag));
+                        res.push(Component::CustomTag(tag));
                         target = other;
                         continue;
                     } else {
@@ -39,7 +39,7 @@ impl Doc {
             if next_tag.starts_with("!--") {
                 let next_tag = next_tag.split_once("!--").unwrap().1;
                 if let Some((comment, other)) = next_tag.split_once("-->") {
-                    res.push(Token::Comment(String::from(comment)));
+                    res.push(Component::Comment(String::from(comment)));
                     target = other;
                     continue;
                 } else {
@@ -51,7 +51,7 @@ impl Doc {
             if next_tag.starts_with('!') {
                 let next_tag = next_tag.split_once("!").unwrap().1;
                 if let Some((doc_type, other)) = next_tag.split_once('>') {
-                    res.push(Token::DocType(String::from(doc_type)));
+                    res.push(Component::DocType(String::from(doc_type)));
                     target = other;
                     continue;
                 } else {
@@ -62,7 +62,7 @@ impl Doc {
             // Normal Tag
             if let Some((raw_tag, other)) = next_tag.split_once('>') {
                 if let Some(tag) = Tag::new(raw_tag) {
-                    res.push(Token::Tag(tag));
+                    res.push(Component::Tag(tag));
                     target = other;
                     continue;
                 } else {
@@ -79,14 +79,14 @@ impl Doc {
             doc: res.into(),
         })
     }
-    fn next_tag<'a, 'b>(target: &'a str, dest: &'b mut Vec<Token>) -> Option<&'a str> {
+    fn next_tag<'a, 'b>(target: &'a str, dest: &'b mut Vec<Component>) -> Option<&'a str> {
         if let Some((text, other)) = target.split_once('<') {
             if !text.is_empty() {
-                dest.push(Token::Text(String::from(text)));
+                dest.push(Component::Text(String::from(text)));
             }
             Some(other)
         } else {
-            dest.push(Token::Text(String::from(target)));
+            dest.push(Component::Text(String::from(target)));
             None
         }
     }
@@ -109,18 +109,18 @@ impl Doc {
         let mut vec = Vec::new();
         let len = self.doc.len();
         for i in 0..len {
-            let Token::Tag(tag) = &self[i] else { continue };
+            let Component::Tag(tag) = &self[i] else { continue };
             if tag.tag() == tag_name {
                 vec.push(i);
             }
         }
         vec
     }
-    pub fn reassign_custom<F: FnMut(Tag) -> Token>(&mut self, mut func: F) {
+    pub fn reassign_custom<F: FnMut(Tag) -> Component>(&mut self, mut func: F) {
         let len = self.doc.len();
         for i in 0..len {
-            if let Token::CustomTag(_) = &self[i] {
-                let Token::CustomTag(tag) = self[i].swap_null() else { unreachable!() };
+            if let Component::CustomTag(_) = &self[i] {
+                let Component::CustomTag(tag) = self[i].swap_null() else { unreachable!() };
                 self[i] = func(tag);
             }
         }
@@ -128,7 +128,7 @@ impl Doc {
 }
 
 impl Index<usize> for Doc {
-    type Output = Token;
+    type Output = Component;
 
     fn index(&self, index: usize) -> &Self::Output {
         self.doc.index(index)

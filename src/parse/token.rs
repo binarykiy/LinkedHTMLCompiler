@@ -4,7 +4,7 @@ use crate::parse::doc::Doc;
 use crate::parse::tag::Tag;
 
 #[derive(Debug)]
-pub enum Token {
+pub enum Component {
     Text(String),
     Comment(String),
     Tag(Tag),
@@ -14,7 +14,7 @@ pub enum Token {
     Null,
 }
 
-impl Token {
+impl Component {
     pub fn swap_null(&mut self) -> Self {
         let mut dest = Self::Null;
         mem::swap(self, &mut dest);
@@ -22,7 +22,7 @@ impl Token {
     }
 }
 
-impl Display for Token {
+impl Display for Component {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
         match self {
             Self::Text(v) => {
