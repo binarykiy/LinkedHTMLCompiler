@@ -16,64 +16,22 @@ impl Doc {
         let mut res = Vec::new();
         let mut target = doc.as_str();
         while let Some(next_tag) = Self::skip_text(target, &mut res) {
-            // Custom Tag Prefix (Comment Tag Prefix + '?')
-            if next_tag.starts_with("!--?") {
-                let next_tag = next_tag.split_once("!--?").unwrap().1;
-                if let Some((raw_tag, other)) = next_tag.split_once("-->") {
-                    if let Some(tag) = Tag::new(raw_tag) {
-                        res.push(Component::CustomTag(tag));
-                        target = other;
-                        continue;
-                    } else {
-                        // It is not necessary to throw an error to stop compilation
-                        // because an incorrect custom tag is also a correct comment.
-                        eprintln!("[WARN] The syntax of a custom tag is incorrect:");
-                        eprintln!("\t{}", raw_tag);
-                        // return None;
-                    }
-                } else {
-                    eprintln!("[ERROR] There is no '-->' for a '<!--'.");
-                    return None;
+            if next_tag.starts_with("<!--") {
+                let comment = Self::parse_comment(&mut target)?;
+                if let Component::CustomComment(tag_source) = comment {
+                    res.push(Self::parse_custom_tag(tag_source));
                 }
+                continue
             }
-            // Comment Tag Prefix
-            if next_tag.starts_with("!--") {
-                let next_tag = next_tag.split_once("!--").unwrap().1;
-                if let Some((comment, other)) = next_tag.split_once("-->") {
-                    res.push(Component::Comment(String::from(comment)));
-                    target = other;
-                    continue;
-                } else {
-                    eprintln!("[ERROR] There is no '-->' for a '<!--'.");
-                    return None;
-                }
+            if next_tag.starts_with("<!") {
+                let doc_type = Self::parse_doc_type(&mut target)?;
+                res.push(doc_type);
+                continue
             }
-            // DOCTYPE Tag Prefix
-            if next_tag.starts_with('!') {
-                let next_tag = next_tag.split_once("!").unwrap().1;
-                if let Some((doc_type, other)) = next_tag.split_once('>') {
-                    res.push(Component::DocType(String::from(doc_type)));
-                    target = other;
-                    continue;
-                } else {
-                    eprintln!("[ERROR] There is no '>' for a '<!'.");
-                    return None;
-                }
-            }
-            // Normal Tag
-            if let Some((raw_tag, other)) = next_tag.split_once('>') {
-                if let Some(tag) = Tag::new(raw_tag) {
-                    res.push(Component::Tag(tag));
-                    target = other;
-                    continue;
-                } else {
-                    eprintln!("[WARN] The syntax of a tag is incorrect:");
-                    eprintln!("\t{}", raw_tag);
-                    return None;
-                }
-            } else {
-                eprintln!("[ERROR] There is no '>' for a '<'.");
-                return None;
+            if next_tag.starts_with("<") {
+                let tag = Self::parse_tag(&mut target)?;
+                res.push(tag);
+                continue
             }
         }
         Some(Self {
