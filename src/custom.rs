@@ -1,7 +1,6 @@
 mod include;
 
 use once_cell::sync::Lazy;
-pub use include::run as include;
 use crate::config::Config;
 use crate::parse::doc::Doc;
 use crate::parse::tag::Tag;
