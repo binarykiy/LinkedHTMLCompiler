@@ -15,7 +15,7 @@ fn main() {
     name.retain(|c| c != '\r' && c != '\n' && c != '"');
     let (mut cfg, Ok(source)) = Config::new(name.clone())
         else { panic!("Failed to open the file to compile.") };
-    let doc = parse::parse(source, &mut cfg);
+    let doc = parse::into_doc(source, &mut cfg);
     cfg.write_all(format!("{}", doc));
     println!("[INFO] Compilation finished. Time = {:?}", timer.elapsed());
 }

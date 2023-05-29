@@ -8,7 +8,7 @@ pub fn run(mut tag: Tag, cfg: &mut Config) -> Option<Doc> {
     let link = link_raw.trim_matches('"');
     let source = cfg.read_relative(link)
         .expect(format!("[ERROR] Failed to read the linked file: {}", link).as_str());
-    let mut linked_doc = parse::parse(source, cfg);
+    let mut linked_doc = parse::into_doc(source, cfg);
     let begin = linked_doc.find_tags("body");
     let end = linked_doc.find_tags("/body");
     validate_body_tag(&begin, &end);

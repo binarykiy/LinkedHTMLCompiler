@@ -9,7 +9,7 @@ pub mod tag;
 pub mod token;
 pub mod doc;
 
-pub fn parse(source: Rc<String>, cfg: &mut Config) -> Doc {
+pub fn into_doc(source: Rc<String>, cfg: &mut Config) -> Doc {
     let mut doc = Doc::new(source).unwrap_or_else(|| {
         process::exit(0);
     });
