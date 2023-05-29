@@ -2,6 +2,7 @@ use std::collections::VecDeque;
 use std::fmt::{Display, Formatter};
 use std::ops::{Index, IndexMut, RangeBounds};
 use std::rc::Rc;
+use std::str;
 use crate::parse::tag::Tag;
 use crate::parse::component::Component;
 
@@ -14,7 +15,7 @@ impl Doc {
     pub fn new(doc: Rc<String>) -> Option<Self> {
         let mut res = Vec::new();
         let mut target = doc.as_str();
-        while let Some(next_tag) = Self::next_tag(target, &mut res) {
+        while let Some(next_tag) = Self::skip_text(target, &mut res) {
             // Custom Tag Prefix (Comment Tag Prefix + '?')
             if next_tag.starts_with("!--?") {
                 let next_tag = next_tag.split_once("!--?").unwrap().1;
@@ -89,6 +90,21 @@ impl Doc {
             dest.push(Component::Text(String::from(target)));
             None
         }
+    }
+    fn skip_text<'a, 'b>(target: &'a str, dest: &'b mut Vec<Component>) -> Option<&'a str> {
+        let bytes = target.as_bytes();
+        for i in 0..bytes.len() {
+            if bytes[i] == b'<' {
+                if i > 0 {
+                    let text = String::from(str::from_utf8(&bytes[..i]).unwrap());
+                    dest.push(Component::Text(text));
+                }
+                return Some(str::from_utf8(&bytes[i..]).unwrap())
+            }
+        }
+        let text = String::from(target);
+        dest.push(Component::Text(text));
+        None
     }
     fn parse_comment(target: &mut &str) -> Option<Component> {
         debug_assert!(target.starts_with("<!--"));
