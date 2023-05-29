@@ -29,8 +29,9 @@ impl Tag {
             return None
         }
         (_, *str_all) = str_all.split_once("<").unwrap();
-        let (tag, _) = str_all.split_once('>')?;
+        let (tag, raw_attr) = str_all.split_once('>')?;
         if !tag.contains(' ') {
+            *str_all = raw_attr;
             return Self::new(tag)
         }
         let (tag, raw_attr) = str_all.split_once(' ').unwrap();
