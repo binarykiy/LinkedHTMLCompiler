@@ -90,6 +90,16 @@ impl Doc {
             None
         }
     }
+    fn parse_comment(target: &mut &str) -> Option<Component> {
+        debug_assert!(target.starts_with("<!--"));
+        let Some((_, other)) = target.split_once("<!--")
+            else { return None };
+        let Some((value, other)) = other.split_once("-->")
+            else { return None };
+        let value_owned = String::from(value);
+        *target = other;
+        Some(Component::Comment(value_owned))
+    }
     pub fn extract<R: RangeBounds<usize>>(&mut self, range: R) {
         let mut triggered = false;
         let len = self.doc.len();
