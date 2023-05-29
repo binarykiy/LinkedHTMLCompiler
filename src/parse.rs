@@ -3,10 +3,10 @@ use std::rc::Rc;
 use crate::config::Config;
 use crate::custom;
 use crate::parse::doc::Doc;
-use crate::parse::token::Component;
+use crate::parse::component::Component;
 
 pub mod tag;
-pub mod token;
+pub mod component;
 pub mod doc;
 
 pub fn into_doc(source: Rc<String>, cfg: &mut Config) -> Doc {

@@ -3,7 +3,7 @@ use std::fmt::{Display, Formatter};
 use std::ops::{Index, IndexMut, RangeBounds};
 use std::rc::Rc;
 use crate::parse::tag::Tag;
-use crate::parse::token::Component;
+use crate::parse::component::Component;
 
 #[derive(Debug)]
 pub struct Doc {
