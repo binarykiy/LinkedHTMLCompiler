@@ -110,6 +110,12 @@ impl Doc {
             Component::Comment(value_owned)
         }
     }
+    fn parse_custom_tag(content: String) -> Component {
+        match Tag::new(content.as_str()) {
+            Some(tag) => Component::CustomTagNew(tag, content),
+            None => Component::CustomComment(content),
+        }
+    }
     pub fn extract<R: RangeBounds<usize>>(&mut self, range: R) {
         let mut triggered = false;
         let len = self.doc.len();
