@@ -7,11 +7,11 @@ pub fn read_from_stdin() -> io::Result<String> {
     Ok(buf)
 }
 
-pub struct Lazy<K, T> {
+pub struct LazyClosure<K, T> {
     inner: LazyStatus<K, T>,
 }
 
-impl<K, T> Lazy<K, T> {
+impl<K, T> LazyClosure<K, T> {
     pub const fn new(func: fn(K) -> T, key: K) -> Self {
         Self {
             inner: LazyStatus::Uninitialized(func, Some(key)),

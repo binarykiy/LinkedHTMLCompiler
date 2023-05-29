@@ -3,11 +3,11 @@ use std::io;
 use std::io::{BufReader, BufWriter, Read, Write};
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
-use crate::util::{Lazy, VecDict};
+use crate::util::{LazyClosure, VecDict};
 
 pub struct Config {
     workspace: PathBuf,
-    out: Lazy<PathBuf, BufWriter<File>>,
+    out: LazyClosure<PathBuf, BufWriter<File>>,
     src: VecDict<PathBuf, Rc<String>>,
 }
 
@@ -16,7 +16,7 @@ impl Config {
         let workspace = Path::new(&input).parent()
             .expect("[FATAL] Failed to open working directory")
             .to_path_buf();
-        let out = Lazy::new(|path| {
+        let out = LazyClosure::new(|path| {
             BufWriter::new(OpenOptions::new()
             .create(true).truncate(true).write(true)
             .open(path)
