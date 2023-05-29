@@ -38,17 +38,6 @@ impl Doc {
             doc: res.into(),
         })
     }
-    fn next_tag<'a, 'b>(target: &'a str, dest: &'b mut Vec<Component>) -> Option<&'a str> {
-        if let Some((text, other)) = target.split_once('<') {
-            if !text.is_empty() {
-                dest.push(Component::Text(String::from(text)));
-            }
-            Some(other)
-        } else {
-            dest.push(Component::Text(String::from(target)));
-            None
-        }
-    }
     fn skip_text<'a, 'b>(target: &'a str, dest: &'b mut Vec<Component>) -> Option<&'a str> {
         let bytes = target.as_bytes();
         for i in 0..bytes.len() {
