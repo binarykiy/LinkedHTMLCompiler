@@ -16,6 +16,7 @@ impl Doc {
         let mut res = Vec::new();
         let mut target = doc.as_str();
         while let Some(next_tag) = Self::skip_text(target, &mut res) {
+            target = next_tag;
             if next_tag.starts_with("<!--") {
                 let comment = Self::parse_comment(&mut target)?;
                 if let Component::CustomComment(tag_source) = comment {
