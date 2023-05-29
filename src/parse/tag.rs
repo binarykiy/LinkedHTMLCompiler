@@ -24,6 +24,29 @@ impl Tag {
         }
         Some(res)
     }
+    pub fn new_once(str_all: &mut &str) -> Option<Self> {
+        if !str_all.starts_with("<") {
+            return None
+        }
+        (_, *str_all) = str_all.split_once("<").unwrap();
+        let (tag, raw_attr) = str_all.split_once(' ')
+            .unwrap_or((str_all, ""));
+        let mut res = Self {
+            tag: String::from(tag),
+            attributes: VecDict::new(),
+        };
+        let attributes = raw_attr.as_bytes();
+        let len = attributes.len();
+        let mut idx = find_first_not_of(attributes, b' ', 0);
+        while idx < len {
+            if attributes[idx] == b'>' {
+                *str_all = str::from_utf8(&attributes[idx + 1..]).unwrap();
+                return Some(res)
+            }
+            idx = res.next_attribute(attributes, idx)?;
+        }
+        None
+    }
     fn next_attribute(&mut self, slice: &[u8], from: usize) -> Option<usize> {
         let len = slice.len();
         let eq = find_first_of(slice, b'=', from);
