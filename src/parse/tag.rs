@@ -99,11 +99,6 @@ impl Tag {
         mem::swap(self.attributes.get_mut(key)?, &mut dest);
         Some(dest)
     }
-    pub fn clean(self) {
-        self.attributes.for_each(|key, _| {
-            eprintln!("[WARN] Attribute '{}' does not work in Tag '{}'", key, self.tag);
-        });
-    }
 }
 
 impl Display for Tag {

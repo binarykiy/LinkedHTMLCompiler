@@ -19,7 +19,6 @@ pub fn run(mut tag: Tag, cfg: &mut Config) -> Option<Doc> {
     if begin.len() == 1 && begin.len() == 1 {
         linked_doc.extract(begin[0]+1..end[0]);
     }
-    tag.clean();
     Some(linked_doc)
 }
 
