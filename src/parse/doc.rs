@@ -125,6 +125,11 @@ impl Doc {
         *target = other;
         Some(Component::DocType(String::from(content)))
     }
+    fn parse_tag(target: &mut &str) -> Option<Component> {
+        debug_assert!(target.starts_with("<"));
+        let tag = Tag::new_once(target)?;
+        Some(Component::Tag(tag))
+    }
     pub fn extract<R: RangeBounds<usize>>(&mut self, range: R) {
         let mut triggered = false;
         let len = self.doc.len();
