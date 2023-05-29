@@ -7,6 +7,7 @@ use crate::parse::tag::Tag;
 pub enum Component {
     Text(String),
     Comment(String),
+    CustomComment(String),
     Tag(Tag),
     CustomTag(Tag),
     DocType(String),
@@ -30,6 +31,9 @@ impl Display for Component {
             }
             Self::Comment(v) => {
                 write!(fmt, "<!--{}-->", v)
+            }
+            Self::CustomComment(v) => {
+                write!(fmt, "<!--?{}-->", v)
             }
             Self::Tag(v) => {
                 write!(fmt, "<{}>", v)
