@@ -4,7 +4,7 @@ use crate::parse::doc::Doc;
 use crate::parse::tag::Tag;
 
 pub fn run(mut tag: Tag, cfg: &mut Config) -> Option<Doc> {
-    let link_raw = tag.move_value("link")?;
+    let link_raw = tag.consume("link")?;
     let link = link_raw.trim_matches('"');
     let source = cfg.read_relative(link)
         .expect(format!("[ERROR] Failed to read the linked file: {}", link).as_str());

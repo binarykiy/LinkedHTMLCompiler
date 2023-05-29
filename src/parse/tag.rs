@@ -67,16 +67,7 @@ impl Tag {
     pub fn tag(&self) -> &str {
         &self.tag[..]
     }
-    pub fn consume<F: FnOnce(String)>(&mut self, key: &str, consumer: F) {
-        self.consume_or(key, consumer, || {});
-    }
-    pub fn consume_or<F: FnOnce(String), G: FnOnce()>(&mut self, key: &str, consumer: F, or: G) {
-        match self.move_value(key) {
-            Some(v) => consumer(v),
-            None => or(),
-        }
-    }
-    pub fn move_value(&mut self, key: &str) -> Option<String> {
+    pub fn consume(&mut self, key: &str) -> Option<String> {
         let mut dest = String::new();
         mem::swap(self.attributes.get_mut(key)?, &mut dest);
         Some(dest)
