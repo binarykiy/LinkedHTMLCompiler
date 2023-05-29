@@ -29,8 +29,11 @@ impl Tag {
             return None
         }
         (_, *str_all) = str_all.split_once("<").unwrap();
-        let (tag, raw_attr) = str_all.split_once(' ')
-            .unwrap_or((str_all, ""));
+        let (tag, _) = str_all.split_once('>')?;
+        if !tag.contains(' ') {
+            return Self::new(tag)
+        }
+        let (tag, raw_attr) = str_all.split_once(' ').unwrap();
         let mut res = Self {
             tag: String::from(tag),
             attributes: VecDict::new(),
