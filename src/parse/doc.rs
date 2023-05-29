@@ -94,11 +94,21 @@ impl Doc {
         debug_assert!(target.starts_with("<!--"));
         let Some((_, other)) = target.split_once("<!--")
             else { return None };
-        let Some((value, other)) = other.split_once("-->")
+        let Some((content, other)) = other.split_once("-->")
             else { return None };
-        let value_owned = String::from(value);
         *target = other;
-        Some(Component::Comment(value_owned))
+        Some(Self::create_comment(content))
+    }
+    fn create_comment(content: &str) -> Component {
+        if content.starts_with("?") {
+            let Some((_, value)) = content.split_once("?")
+                else { unreachable!() };
+            let value_owned = String::from(value);
+            Component::CustomComment(value_owned)
+        } else {
+            let value_owned = String::from(content);
+            Component::Comment(value_owned)
+        }
     }
     pub fn extract<R: RangeBounds<usize>>(&mut self, range: R) {
         let mut triggered = false;
