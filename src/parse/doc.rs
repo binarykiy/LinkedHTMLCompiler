@@ -76,7 +76,7 @@ impl Doc {
     }
     fn parse_custom_tag(content: String) -> Component {
         match Tag::new(content.as_str()) {
-            Some(tag) => Component::CustomTagNew(tag, content),
+            Some(tag) => Component::CustomTag(tag, content),
             None => Component::CustomComment(content),
         }
     }
@@ -123,8 +123,8 @@ impl Doc {
     pub fn reassign_custom<F: FnMut(Tag) -> Component>(&mut self, mut func: F) {
         let len = self.doc.len();
         for i in 0..len {
-            if let Component::CustomTag(_) = &self[i] {
-                let Component::CustomTag(tag) = self[i].swap_null() else { unreachable!() };
+            if let Component::CustomTag(_, _) = &self[i] {
+                let Component::CustomTag(tag, _) = self[i].swap_null() else { unreachable!() };
                 self[i] = func(tag);
             }
         }
