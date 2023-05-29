@@ -10,6 +10,7 @@ pub enum Component {
     CustomComment(String),
     Tag(Tag),
     CustomTag(Tag),
+    CustomTagNew(Tag, String),
     DocType(String),
     Pointer(Doc),
     Null,
@@ -39,6 +40,9 @@ impl Display for Component {
                 write!(fmt, "<{}>", v)
             }
             Self::CustomTag(v) => {
+                write!(fmt, "<!--?{}-->", v)
+            }
+            Self::CustomTagNew(_, v) => {
                 write!(fmt, "<!--?{}-->", v)
             }
             Self::DocType(v) => {
