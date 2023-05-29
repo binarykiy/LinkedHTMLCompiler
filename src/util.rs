@@ -8,29 +8,35 @@ pub fn read_from_stdin() -> io::Result<String> {
 }
 
 pub struct Lazy<K, T> {
-    func: fn(K) -> T,
-    key: Option<K>,
-    inner: Option<T>,
+    inner: LazyStatus<K, T>,
 }
 
 impl<K, T> Lazy<K, T> {
-    pub fn new(func: fn(K) -> T, key: K) -> Self {
+    pub const fn new(func: fn(K) -> T, key: K) -> Self {
         Self {
-            func,
-            key: Some(key),
-            inner: None,
+            inner: LazyStatus::Uninitialized(func, Some(key)),
         }
     }
     pub fn get_mut(&mut self) -> &mut T {
-        if let None = self.inner {
-            let key = self.get_key();
-            self.inner = Some((self.func)(key));
-        }
-        let Some(inner) = &mut self.inner else { unreachable!() };
-        inner
+        self.inner.init();
+        let LazyStatus::Initialized(res) = &mut self.inner
+            else { unreachable!() };
+        res
     }
-    fn get_key(&mut self) -> K {
-        mem::replace(&mut self.key, None).unwrap()
+}
+
+enum LazyStatus<K, T> {
+    Uninitialized(fn(K) -> T, Option<K>),
+    Initialized(T),
+}
+
+impl<K, T> LazyStatus<K, T> {
+    fn init(&mut self) {
+        let Self::Uninitialized(func, key) = self
+            else { return };
+        let key = mem::replace(key, None).unwrap();
+        let inner = func(key);
+        *self = Self::Initialized(inner);
     }
 }
 
