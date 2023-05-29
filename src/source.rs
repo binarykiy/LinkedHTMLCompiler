@@ -39,4 +39,17 @@ impl<'a> SourceManager<'a> {
             panic!("SourceManager: byte index {idx} is out of bounds")
         }
     }
+    pub fn pop_if_starts_with(&mut self, bytes: &[u8]) -> bool {
+        let len = bytes.len();
+        if self.source.len() - self.begin < len {
+            return false
+        }
+        for i in self.begin..len {
+            if self.source[i] != bytes[i] {
+                return false
+            }
+        }
+        self.begin += len;
+        true
+    }
 }
