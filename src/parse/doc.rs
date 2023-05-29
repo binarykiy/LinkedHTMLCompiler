@@ -116,6 +116,15 @@ impl Doc {
             None => Component::CustomComment(content),
         }
     }
+    fn parse_doc_type(target: &mut &str) -> Option<Component> {
+        debug_assert!(target.starts_with("<!"));
+        let Some((_, other)) = target.split_once("<!")
+            else { return None };
+        let Some((content, other)) = other.split_once(">")
+            else { return None };
+        *target = other;
+        Some(Component::DocType(String::from(content)))
+    }
     pub fn extract<R: RangeBounds<usize>>(&mut self, range: R) {
         let mut triggered = false;
         let len = self.doc.len();
