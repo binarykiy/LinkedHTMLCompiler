@@ -5,6 +5,7 @@ use std::rc::Rc;
 use std::str;
 use crate::parse::tag::Tag;
 use crate::parse::component::Component;
+use crate::util;
 
 #[derive(Debug)]
 pub struct Doc {
@@ -41,18 +42,17 @@ impl Doc {
     }
     fn skip_text<'a, 'b>(target: &'a str, dest: &'b mut Vec<Component>) -> Option<&'a str> {
         let bytes = target.as_bytes();
-        for i in 0..bytes.len() {
-            if bytes[i] == b'<' {
-                if i > 0 {
-                    let text = String::from(str::from_utf8(&bytes[..i]).unwrap());
-                    dest.push(Component::Text(text));
-                }
-                return Some(str::from_utf8(&bytes[i..]).unwrap())
-            }
+        let idx = util::first_of(bytes, b'<', 0);
+        if idx == bytes.len() {
+            let text = String::from(target);
+            dest.push(Component::Text(text));
+            return None
         }
-        let text = String::from(target);
-        dest.push(Component::Text(text));
-        None
+        if idx > 0 {
+            let text = String::from(str::from_utf8(&bytes[..idx]).unwrap());
+            dest.push(Component::Text(text));
+        }
+        Some(str::from_utf8(&bytes[idx..]).unwrap())
     }
     fn parse_comment(target: &mut &str) -> Option<Component> {
         debug_assert!(target.starts_with("<!--"));
