@@ -2,6 +2,7 @@ mod config;
 mod custom;
 mod parse;
 mod util;
+mod source;
 
 use std::time::Instant;
 use crate::config::Config;
