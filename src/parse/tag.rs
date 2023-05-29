@@ -1,5 +1,6 @@
 use std::fmt::{Display, Formatter};
 use std::{fmt, mem, str};
+use crate::util;
 use crate::util::VecDict;
 
 #[derive(Debug)]
@@ -18,7 +19,7 @@ impl Tag {
         };
         let attributes = raw_attr.as_bytes();
         let len = attributes.len();
-        let mut idx = find_first_not_of(attributes, b' ', 0);
+        let mut idx = util::first_not_of(attributes, b' ', 0);
         while idx < len {
             idx = res.next_attribute(attributes, idx)?;
         }
@@ -41,7 +42,7 @@ impl Tag {
         };
         let attributes = raw_attr.as_bytes();
         let len = attributes.len();
-        let mut idx = find_first_not_of(attributes, b' ', 0);
+        let mut idx = util::first_not_of(attributes, b' ', 0);
         while idx < len {
             if attributes[idx] == b'>' {
                 *str_all = str::from_utf8(&attributes[idx + 1..]).unwrap();
@@ -53,7 +54,7 @@ impl Tag {
     }
     fn next_attribute(&mut self, slice: &[u8], from: usize) -> Option<usize> {
         let len = slice.len();
-        let eq = find_first_of(slice, b'=', from);
+        let eq = util::first_of(slice, b'=', from);
         let key = str::from_utf8(&slice[from..eq]).unwrap();
         if eq == len {
             eprintln!("[ERROR] There is no separator of an attribute for key: {}", key);
@@ -66,12 +67,12 @@ impl Tag {
         let to = self.end_of_value(slice, eq + 1, key)?;
         let value = str::from_utf8(&slice[eq + 1..to]).unwrap();
         self.push_attribute(String::from(key), String::from(value));
-        Some(find_first_not_of(slice, b' ', to))
+        Some(util::first_not_of(slice, b' ', to))
     }
     fn end_of_value(&mut self, slice: &[u8], from: usize, key: &str) -> Option<usize> {
         let len = slice.len();
         if slice[from] == b'"' {
-            let dq = find_first_of(slice, b'"', from + 1);
+            let dq = util::first_of(slice, b'"', from + 1);
             if dq == len {
                 eprintln!("[ERROR] There is no value of an attribute for key: {}", key);
                 return None
@@ -81,7 +82,7 @@ impl Tag {
             eprintln!("[ERROR] There is no value of an attribute for key: {}", key);
             None
         } else {
-            Some(find_first_of(slice, b' ', from))
+            Some(util::first_of(slice, b' ', from))
         }
     }
     fn push_attribute(&mut self, key: String, value: String) {
@@ -112,24 +113,4 @@ impl Display for Tag {
         });
         write!(fmt, "{}", buf)
     }
-}
-
-fn find_first_of(slice: &[u8], target: u8, from: usize) -> usize {
-    let len = slice.len();
-    for i in from..len {
-        if slice[i] == target {
-            return i
-        }
-    }
-    len
-}
-
-fn find_first_not_of(slice: &[u8], target: u8, from: usize) -> usize {
-    let len = slice.len();
-    for i in from..len {
-        if slice[i] != target {
-            return i
-        }
-    }
-    len
 }

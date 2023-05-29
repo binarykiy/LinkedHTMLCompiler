@@ -1,6 +1,26 @@
 use std::{io, mem};
 use std::io::{BufRead, BufReader};
 
+pub fn first_of(slice: &[u8], target: u8, from: usize) -> usize {
+    let len = slice.len();
+    for i in from..len {
+        if slice[i] == target {
+            return i
+        }
+    }
+    len
+}
+
+pub fn first_not_of(slice: &[u8], target: u8, from: usize) -> usize {
+    let len = slice.len();
+    for i in from..len {
+        if slice[i] != target {
+            return i
+        }
+    }
+    len
+}
+
 pub fn read_from_stdin() -> io::Result<String> {
     let mut buf = String::new();
     BufReader::new(io::stdin().lock()).read_line(&mut buf)?;
