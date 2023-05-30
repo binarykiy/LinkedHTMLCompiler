@@ -14,32 +14,40 @@ impl<'a> SourceManager<'a> {
             next_from: 0,
         }
     }
-    pub fn find_first_of(&self, bytes: &[u8]) -> Option<usize> {
+    pub fn next_at_first_of(&mut self, bytes: &[u8]) -> bool {
         let len = bytes.len();
         let to = self.end - len;
         for i in self.from..=to {
-            if &self.source[i..=i + len] == bytes {
-                return Some(i)
+            if &self.source[i..i + len] == bytes {
+                self.end = i;
+                self.next_from = i + len;
+                return true
             }
         }
-        None
+        false
     }
-    pub fn find_first_not_of(&self, bytes: &[u8]) -> Option<usize> {
+    pub fn next_at_first_not_of(&mut self, bytes: &[u8]) -> bool {
         let len = bytes.len();
         let to = self.end - len;
         for i in self.from..=to {
-            if &self.source[i..=i + len] != bytes {
-                return Some(i)
+            if &self.source[i..i + len] != bytes {
+                self.end = i;
+                self.next_from = i + len;
+                return true
             }
         }
-        None
+        false
     }
-    pub fn retain_from(&mut self, from: usize) {
-        self.validate_index(from);
-        self.from = from;
+    pub fn move_to_next(&mut self) {
+        self.from = self.next_from;
+        self.end = self.source.len();
+        self.next_from = self.source.len();
+    }
+    pub fn is_empty(&self) -> bool {
+        self.from == self.source.len()
     }
     fn validate_index(&self, idx: usize) {
-        if idx > self.source.len() {
+        if idx < self.from || idx > self.end {
             panic!("SourceManager: byte index {idx} is out of bounds")
         }
     }
