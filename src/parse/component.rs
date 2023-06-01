@@ -1,7 +1,19 @@
 use std::fmt::{Display, Formatter};
 use std::{fmt, mem};
 use crate::parse::doc::Doc;
-use crate::parse::tag::Tag;
+use crate::parse::tag::{BinaryTag, Tag};
+
+#[derive(Debug)]
+pub enum BinaryComponent {
+    Text(Vec<u8>),
+    Comment(Vec<u8>),
+    CustomComment(Vec<u8>),
+    Tag(BinaryTag),
+    CustomTag(BinaryTag, Vec<u8>),
+    DocType(Vec<u8>),
+    Pointer(Doc),
+    Null,
+}
 
 #[derive(Debug)]
 pub enum Component {

@@ -4,6 +4,14 @@ use crate::util;
 use crate::util::VecDict;
 
 #[derive(Debug)]
+pub struct BinaryTag {
+    tag: Vec<u8>,
+    attributes: VecDict<Vec<u8>, Vec<u8>>,
+}
+
+impl Tag {}
+
+#[derive(Debug)]
 pub struct Tag {
     tag: String,
     attributes: VecDict<String, String>,
