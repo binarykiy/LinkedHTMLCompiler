@@ -4,8 +4,43 @@ use std::ops::{Index, IndexMut, RangeBounds};
 use std::rc::Rc;
 use std::str;
 use crate::parse::tag::Tag;
-use crate::parse::component::Component;
+use crate::parse::component::{BinaryComponent, Component};
+use crate::source::SourceManager;
 use crate::util;
+
+#[derive(Debug)]
+pub struct BinaryDoc {
+    doc: VecDeque<BinaryComponent>,
+}
+
+impl BinaryDoc {
+    pub fn new(doc: Rc<String>) -> Option<Self> {
+        let mut components = Vec::new();
+        let mut source = SourceManager::new(&*doc);
+        while {
+            let res = source.next_at_first_of(b"<");
+            let text = source.partially_to_vec();
+            if !text.is_empty() {
+                components.push(BinaryComponent::Text(text));
+            }
+            res
+        }{
+            source.move_to_next();
+            if source.pop_if_starts_with(b"!--?") {
+                // todo: CustomTag
+            } else if source.pop_if_starts_with(b"!--") {
+                // todo: Comment
+            } else if source.pop_if_starts_with(b"!") {
+                // todo: DocType
+            } else {
+                // todo: Tag
+            }
+        }
+        Some(Self {
+            doc: components.into(),
+        })
+    }
+}
 
 #[derive(Debug)]
 pub struct Doc {
