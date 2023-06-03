@@ -56,10 +56,8 @@ impl<'a> SourceManager<'a> {
         if self.end - self.from < len {
             return false
         }
-        for i in self.from..len {
-            if self.source[i] != bytes[i] {
-                return false
-            }
+        if &self.source[self.from..self.from + len] != bytes {
+            return false
         }
         self.from += len;
         true
