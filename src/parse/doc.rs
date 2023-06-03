@@ -14,17 +14,12 @@ pub struct BinaryDoc {
 }
 
 impl BinaryDoc {
-    pub fn new(doc: Rc<String>) -> Option<Self> {
-        let mut components = Vec::new();
-        let mut source = SourceManager::new(&*doc);
-        while {
-            let res = source.next_at_first_of(b"<");
-            let text = source.partially_to_vec();
-            if !text.is_empty() {
-                components.push(BinaryComponent::Text(text));
-            }
-            res
-        }{
+    pub fn new(source: Rc<String>) -> Option<Self> {
+        let mut doc = Self {
+            doc: VecDeque::new(),
+        };
+        let mut source = SourceManager::new(&*source);
+        while doc.push_text_and_next(&mut source) {
             source.move_to_next();
             if source.pop_if_starts_with(b"!--?") {
                 // todo: CustomTag
@@ -36,9 +31,21 @@ impl BinaryDoc {
                 // todo: Tag
             }
         }
-        Some(Self {
-            doc: components.into(),
-        })
+        Some(doc)
+    }
+    fn push_text_and_next(&mut self, source: &mut SourceManager) -> bool {
+        let res = source.next_at_first_of(b"<");
+        let text = source.partially_to_vec();
+        if !text.is_empty() {
+            self.push(BinaryComponent::Text(text));
+        }
+        if res {
+            source.move_to_next();
+        }
+        res
+    }
+    fn push(&mut self, component: BinaryComponent) {
+        self.doc.push_back(component);
     }
 }
 
