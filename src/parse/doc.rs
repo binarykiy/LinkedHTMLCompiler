@@ -22,13 +22,13 @@ impl BinaryDoc {
         while doc.push_text_and_next(&mut source) {
             source.move_to_next();
             if source.pop_if_starts_with(b"!--?") {
-                // todo: CustomTag
+                doc.push_custom_tag(&mut source)?;
             } else if source.pop_if_starts_with(b"!--") {
-                // todo: Comment
+                doc.push_comment(&mut source)?;
             } else if source.pop_if_starts_with(b"!") {
-                // todo: DocType
+                doc.push_doc_type(&mut source)?;
             } else {
-                // todo: Tag
+                doc.push_tag(&mut source)?;
             }
         }
         Some(doc)
@@ -43,6 +43,38 @@ impl BinaryDoc {
             source.move_to_next();
         }
         res
+    }
+    fn push_custom_tag(&mut self, source: &mut SourceManager) -> Option<()> {
+        if !source.next_at_first_of(b"-->") {
+            return None
+        }
+        // todo
+        source.move_to_next();
+        Some(())
+    }
+    fn push_comment(&mut self, source: &mut SourceManager) -> Option<()> {
+        if !source.next_at_first_of(b"-->") {
+            return None
+        }
+        // todo
+        source.move_to_next();
+        Some(())
+    }
+    fn push_doc_type(&mut self, source: &mut SourceManager) -> Option<()> {
+        if !source.next_at_first_of(b">") {
+            return None
+        }
+        // todo
+        source.move_to_next();
+        Some(())
+    }
+    fn push_tag(&mut self, source: &mut SourceManager) -> Option<()> {
+        if !source.next_at_first_of(b">") {
+            return None
+        }
+        // todo
+        source.move_to_next();
+        Some(())
     }
     fn push(&mut self, component: BinaryComponent) {
         self.doc.push_back(component);
