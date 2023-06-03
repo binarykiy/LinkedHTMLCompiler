@@ -20,7 +20,6 @@ impl BinaryDoc {
         };
         let mut source = SourceManager::new(&*source);
         while doc.push_text_and_next(&mut source) {
-            source.move_to_next();
             if source.pop_if_starts_with(b"!--?") {
                 doc.push_custom_tag(&mut source)?;
             } else if source.pop_if_starts_with(b"!--") {
