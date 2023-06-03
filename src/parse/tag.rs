@@ -1,5 +1,6 @@
 use std::fmt::{Display, Formatter};
 use std::{fmt, mem, str};
+use crate::source::SourceManager;
 use crate::util;
 use crate::util::VecDict;
 
@@ -9,7 +10,16 @@ pub struct BinaryTag {
     attributes: VecDict<Vec<u8>, Vec<u8>>,
 }
 
-impl Tag {}
+impl BinaryTag {
+    pub fn new(source: &mut SourceManager) -> Option<Self> {
+        // todo
+        None
+    }
+    pub fn new_custom(source: SourceManager) -> Option<Self> {
+        // todo
+        None
+    }
+}
 
 #[derive(Debug)]
 pub struct Tag {

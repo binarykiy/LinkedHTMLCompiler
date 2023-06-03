@@ -3,7 +3,7 @@ use std::fmt::{Display, Formatter};
 use std::ops::{Index, IndexMut, RangeBounds};
 use std::rc::Rc;
 use std::str;
-use crate::parse::tag::Tag;
+use crate::parse::tag::{BinaryTag, Tag};
 use crate::parse::component::{BinaryComponent, Component};
 use crate::source::SourceManager;
 use crate::util;
@@ -47,7 +47,11 @@ impl BinaryDoc {
         if !source.next_at_first_of(b"-->") {
             return None
         }
-        // todo
+        if let Some(tag) = BinaryTag::new_custom(source.partially_from()) {
+            self.push(BinaryComponent::CustomTag(tag, source.partially_to_vec()));
+        } else {
+            self.push(BinaryComponent::CustomComment(source.partially_to_vec()));
+        }
         source.move_to_next();
         Some(())
     }
@@ -73,8 +77,8 @@ impl BinaryDoc {
         if !source.next_at_first_of(b">") {
             return None
         }
-        // todo
-        source.move_to_next();
+        let tag = BinaryTag::new(source)?;
+        self.push(BinaryComponent::Tag(tag));
         Some(())
     }
     fn push(&mut self, component: BinaryComponent) {
