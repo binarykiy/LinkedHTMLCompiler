@@ -56,7 +56,8 @@ impl BinaryDoc {
         if !source.next_at_first_of(b"-->") {
             return None
         }
-        // todo
+        let comment = source.partially_to_vec();
+        self.push(BinaryComponent::Comment(comment));
         source.move_to_next();
         Some(())
     }
@@ -64,7 +65,8 @@ impl BinaryDoc {
         if !source.next_at_first_of(b">") {
             return None
         }
-        // todo
+        let doc_type = source.partially_to_vec();
+        self.push(BinaryComponent::DocType(doc_type));
         source.move_to_next();
         Some(())
     }
