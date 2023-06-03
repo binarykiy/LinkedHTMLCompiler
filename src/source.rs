@@ -65,4 +65,13 @@ impl<'a> SourceManager<'a> {
     pub fn partially_to_vec(&self) -> Vec<u8> {
         self.source[self.from..self.end].to_vec()
     }
+    pub fn partially_from(&self) -> Self {
+        let source = &self.source[self.from..self.end];
+        Self {
+            source,
+            from: 0,
+            end: source.len(),
+            next_from: source.len(),
+        }
+    }
 }
