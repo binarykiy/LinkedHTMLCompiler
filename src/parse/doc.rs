@@ -48,7 +48,7 @@ impl BinaryDoc {
             return None
         }
         if let Some(tag) = BinaryTag::new_custom(source.partially_from()) {
-            self.push(BinaryComponent::CustomTag(tag, source.partially_to_vec()));
+            self.push(BinaryComponent::CustomTag(tag));
         } else {
             self.push(BinaryComponent::CustomComment(source.partially_to_vec()));
         }

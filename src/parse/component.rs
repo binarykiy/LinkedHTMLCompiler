@@ -9,7 +9,7 @@ pub enum BinaryComponent {
     Comment(Vec<u8>),
     CustomComment(Vec<u8>),
     Tag(BinaryTag),
-    CustomTag(BinaryTag, Vec<u8>),
+    CustomTag(BinaryTag),
     DocType(Vec<u8>),
     Pointer(Doc),
     Null,
